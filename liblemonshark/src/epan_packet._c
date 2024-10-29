@@ -1,0 +1,53 @@
+/*
+Copyright (c) 2024 DevAM. All Rights Reserved.
+
+SPDX-License-Identifier: GPL-2.0-only
+*/
+
+#define WS_BUILD_DLL
+
+// lemonshark includes
+#include "epan_packet.h"
+
+epan_packet_t *ls_epan_packet_new(void)
+{
+    epan_packet_t *epan_packet = g_malloc0(sizeof(epan_packet_t));
+    return epan_packet;
+}
+
+void ls_epan_packet_free(epan_packet_t *epan_packet)
+{
+    if (epan_packet == NULL)
+    {
+        return;
+    }
+
+    epan_packet->packet_info = NULL;
+    epan_packet->tree = NULL;
+    epan_packet->packet_buffer = NULL;
+
+    g_free(epan_packet);
+}
+
+gint32 ls_epan_packet_size(void)
+{
+    return sizeof(epan_packet_t);
+}
+
+gint32 ls_epan_packet_valid_get(epan_packet_t *epan_packet)
+{
+    return epan_packet->valid;
+}
+
+gint32 ls_epan_packet_valid_set(epan_packet_t *epan_packet, gint32 valid)
+{
+    epan_packet->valid = valid != 0 ? 1 : 0;
+}
+
+void ls_epan_packet_init(epan_packet_t *epan_packet, packet_info *packet_info, proto_tree *tree, tvbuff_t *packet_buffer)
+{
+    epan_packet->valid = 1;
+    epan_packet->packet_info = packet_info;
+    epan_packet->tree = tree;
+    epan_packet->packet_buffer = packet_buffer;
+}

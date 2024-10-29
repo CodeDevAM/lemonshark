@@ -1,0 +1,48 @@
+/*
+Copyright (c) 2024 DevAM. All Rights Reserved.
+
+SPDX-License-Identifier: GPL-2.0-only
+*/
+
+#ifndef __LS_EPAN_PACKET__
+#define __LS_EPAN_PACKET__
+
+// glib includes
+#include "glib.h"
+
+// wireshark includes
+#include "ws_symbol_export.h"
+#include "epan/epan_dissect.h"
+#include "epan/proto.h"
+#include "epan/tvbuff.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    typedef struct epan_packet
+    {
+        gint32 valid;
+        packet_info *packet_info;
+        proto_tree *tree;
+        tvbuff_t *packet_buffer;
+    } epan_packet_t;
+
+    WS_DLL_PUBLIC epan_packet_t *ls_epan_packet_new(void);
+
+    WS_DLL_PUBLIC void ls_epan_packet_free(epan_packet_t *epan_packet);
+
+    WS_DLL_PUBLIC gint32 ls_epan_packet_size(void);
+
+    WS_DLL_PUBLIC gint32 ls_epan_packet_valid_get(epan_packet_t *epan_packet);
+
+    gint32 ls_epan_packet_valid_set(epan_packet_t *epan_packet, gint32 valid);
+
+    void ls_epan_packet_init(epan_packet_t *epan_packet, packet_info *packet_info, proto_tree *tree, tvbuff_t *packet_buffer);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __LS_EPAN_PACKET__
