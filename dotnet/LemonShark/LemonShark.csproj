@@ -11,15 +11,15 @@
     <Authors>DevAM</Authors>
     <Company>DevAM</Company>
     <Product>LemonShark</Product>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Description>Wireshark bindings for C# and .NET.</Description>
 	  <Copyright>Copyright (c) 2024 DevAM. All Rights Reserved.</Copyright>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Wireshark</PackageTags>
-    <AssemblyVersion>0.1.0</AssemblyVersion>
-    <FileVersion>0.1.0</FileVersion>
+    <AssemblyVersion>0.1.1</AssemblyVersion>
+    <FileVersion>0.1.1</FileVersion>
     <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <AssemblyName>LemonShark</AssemblyName>
@@ -27,6 +27,7 @@
     <PackageId>DevAM.LemonShark</PackageId>
     <PackageProjectUrl>https://github.com/CodeDevAM/lemonshark</PackageProjectUrl>
     <RepositoryUrl>https://github.com/CodeDevAM/lemonshark</RepositoryUrl>
+    <BaseOutputPath>..\..\build\dotnet\$(MSBuildProjectName)</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -60,5 +61,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Pack="True" PackagePath="lib\net6.0\native" Include="native\**\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Pack="True" PackagePath="lib\netstandard2.0\native" Include="native\**\*.*" />
+  </ItemGroup>
+
 
 </Project>

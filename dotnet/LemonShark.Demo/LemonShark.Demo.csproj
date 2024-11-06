@@ -6,10 +6,11 @@
 	  <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <BaseOutputPath>..\..\build\dotnet\$(MSBuildProjectName)</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LemonShark\LemonShark.csproj" AdditionalProperties="TargetFramework=net6.0"/>
+    <ProjectReference Include="..\LemonShark\LemonShark.csproj" AdditionalProperties="TargetFramework=net6.0" />
   </ItemGroup>
 
 </Project>
