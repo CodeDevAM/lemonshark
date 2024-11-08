@@ -11,15 +11,15 @@
     <Authors>DevAM</Authors>
     <Company>DevAM</Company>
     <Product>LemonShark</Product>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Description>Wireshark bindings for C# and .NET.</Description>
 	  <Copyright>Copyright (c) 2024 DevAM. All Rights Reserved.</Copyright>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Wireshark</PackageTags>
-    <AssemblyVersion>0.1.1</AssemblyVersion>
-    <FileVersion>0.1.1</FileVersion>
+    <AssemblyVersion>0.1.2</AssemblyVersion>
+    <FileVersion>0.1.2</FileVersion>
     <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <AssemblyName>LemonShark</AssemblyName>
@@ -29,12 +29,6 @@
     <RepositoryUrl>https://github.com/CodeDevAM/lemonshark</RepositoryUrl>
     <BaseOutputPath>..\..\build\dotnet\$(MSBuildProjectName)</BaseOutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="native\win-x64\**" />
-    <EmbeddedResource Remove="native\win-x64\**" />
-    <None Remove="native\win-x64\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\icon.png">
@@ -47,28 +41,38 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="native\linux\x86_64\liblemonshark.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="native\windows\amd64\liblemonshark.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="native\windows\amd64\liblemonshark.lib">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="native\windows\amd64\liblemonshark.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Pack="True" PackagePath="lib\net6.0\native" Include="native\**\*.*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Pack="True" PackagePath="lib\netstandard2.0\native" Include="native\**\*.*" />
-  </ItemGroup>
-
+	<ItemGroup>
+		<Content 
+			Pack="True" 
+			PackagePath="runtimes/win-x64/native/liblemonshark.dll" 
+			Include="../../build/dotnet/runtimes/win-x64/native/liblemonshark.dll" 
+			CopyToOutputDirectory="PreserveNewest" 
+			PublishState="Included" 
+			Link="runtimes/win-x64/native/liblemonshark.dll"/>
+    
+    <Content 
+			Pack="True" 
+			PackagePath="runtimes/win-x64/native/liblemonshark.lib" 
+			Include="../../build/dotnet/runtimes/win-x64/native/liblemonshark.lib" 
+			CopyToOutputDirectory="PreserveNewest" 
+			PublishState="Included" 
+			Link="runtimes/win-x64/native/liblemonshark.lib"/>
+    
+    <Content 
+			Pack="True" 
+			PackagePath="runtimes/win-x64/native/liblemonshark.pdb" 
+			Include="../../build/dotnet/runtimes/win-x64/native/liblemonshark.pdb" 
+			CopyToOutputDirectory="PreserveNewest" 
+			PublishState="Included" 
+			Link="runtimes/win-x64/native/liblemonshark.pdb"/>
+		
+		<Content 
+			Pack="True" 
+			PackagePath="runtimes/linux-x64/native/liblemonshark.so" 
+			Include="../../build/dotnet/runtimes/linux-x64/native/liblemonshark.so"
+			CopyToOutputDirectory="PreserveNewest" 
+			PublishState="Included" 
+			Link="runtimes/linux-x64/native/liblemonshark.so"/>
+	</ItemGroup>
 
 </Project>

@@ -32,7 +32,7 @@ public class LemonShark
         {
             if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
             {
-                string nativeAssemblyDirectory = $"{assemblyDirectory}\\native\\windows\\amd64";
+                string nativeAssemblyDirectory = $"{assemblyDirectory}/runtimes/win-x64/native";
                 path = nativeAssemblyDirectory + (string.IsNullOrEmpty(path) ? "" : $";{path}");
             }
 
@@ -51,7 +51,7 @@ public class LemonShark
         {
             if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
             {
-                string nativeAssemblyDirectory = $"{assemblyDirectory}/native/linux/x86_64";
+                string nativeAssemblyDirectory = $"{assemblyDirectory}/runtimes/linux-x64/native";
                 path = nativeAssemblyDirectory + (string.IsNullOrEmpty(path) ? "" : $":{path}");
             }
 

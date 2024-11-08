@@ -144,21 +144,21 @@ target_compile_definitions(
         COMMAND
             ${CMAKE_COMMAND} -E copy
             ${WIRESHARK_BINARY_BASE_DIRECTORY}/$<CONFIG>/liblemonshark.dll
-            ${DOTNET_BASE_DIRECTORY}/LemonShark/native/${LEMONSHARK_SYSTEM}/${LEMONSHARK_ARCHITECTURE}/liblemonshark.dll)
+            ${DOTNET_BUILD_DIRECTORY}/runtimes/win-x64/native/liblemonshark.dll)
     add_custom_command(
         TARGET liblemonshark
         POST_BUILD
         COMMAND
             ${CMAKE_COMMAND} -E copy
             ${WIRESHARK_BINARY_BASE_DIRECTORY}/$<CONFIG>/liblemonshark.lib
-            ${DOTNET_BASE_DIRECTORY}/LemonShark/native/${LEMONSHARK_SYSTEM}/${LEMONSHARK_ARCHITECTURE}/liblemonshark.lib)
+            ${DOTNET_BUILD_DIRECTORY}/runtimes/win-x64/native/liblemonshark.lib)
     add_custom_command(
         TARGET liblemonshark
         POST_BUILD
         COMMAND
             ${CMAKE_COMMAND} -E copy
             ${WIRESHARK_BINARY_BASE_DIRECTORY}/$<CONFIG>/liblemonshark.pdb
-            ${DOTNET_BASE_DIRECTORY}/LemonShark/native/${LEMONSHARK_SYSTEM}/${LEMONSHARK_ARCHITECTURE}/liblemonshark.pdb)
+            ${DOTNET_BUILD_DIRECTORY}/runtimes/win-x64/native/liblemonshark.pdb)
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_custom_command(
@@ -181,7 +181,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         COMMAND
             ${CMAKE_COMMAND} -E copy
             ${WIRESHARK_BINARY_BASE_DIRECTORY}/liblemonshark.so
-            ${DOTNET_BASE_DIRECTORY}/LemonShark/native/${LEMONSHARK_SYSTEM}/${LEMONSHARK_ARCHITECTURE}/liblemonshark.so)
+            ${DOTNET_BUILD_DIRECTORY}/runtimes/linux-x64/native/liblemonshark.so)
 
 endif()
 

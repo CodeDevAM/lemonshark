@@ -23,15 +23,16 @@ architecture: str = platform.machine().lower()
 
 base_build_directory: str = f"""{os.getcwd()}/build"""
 lemonshark_src_directory: str = f"""{os.getcwd()}/liblemonshark/src"""
-lemonshark_build_directory: str = f"""{base_build_directory}/liblemonshark"""
+lemonshark_build_directory: str = f"""{base_build_directory}/liblemonshark/{system}/{architecture}"""
 lemonshark_binary_base_directory: str = f"""{lemonshark_build_directory}/bin"""
 
 lemonshark_demo_src_directory: str = f"""{os.getcwd()}/liblemonshark/lemonshark_demo"""
-lemonshark_demo_build_directory: str = f"""{base_build_directory}/lemonshark_demo"""
+lemonshark_demo_build_directory: str = f"""{base_build_directory}/lemonshark_demo/{system}/{architecture}"""
+lemonshark_demo_binary_base_directory: str = f"""{lemonshark_demo_build_directory}/bin"""
 
 lemonshark_major_version: int = 0
 lemonshark_minor_version: int = 1
-lemonshark_patch_version: int = 1
+lemonshark_patch_version: int = 2
 
 wireshark_git_url: str = "https://gitlab.com/wireshark/wireshark.git"
 wireshark_major_version: int = 4
@@ -45,7 +46,9 @@ wireshark_binary_base_directory: str = f"""{wireshark_build_directory}/run"""
 wireshark_libs_directory: str = f"""{base_build_directory}/wireshark-win64-libs-{wireshark_major_version}.{wireshark_minor_version}"""
 
 python_base_directory: str = f"""{os.getcwd()}/python"""
+python_build_directory: str = f"""{base_build_directory}/python"""
 dotnet_base_directory: str = f"""{os.getcwd()}/dotnet"""
+dotnet_build_directory: str = f"""{base_build_directory}/dotnet"""
 
 win_flex_bison_url: str = "https://github.com/lexxmark/winflexbison/releases/download/v2.5.25/win_flex_bison-2.5.25.zip"
 strawberry_perl_url: str = "https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54001_64bit_UCRT/strawberry-perl-5.40.0.1-64bit-portable.zip"
@@ -213,6 +216,7 @@ def integrate_lemonshark():
 
             set(LEMONSHARK_DEMO_SRC_DIRECTORY {lemonshark_demo_src_directory})
             set(LEMONSHARK_DEMO_BUILD_DIRECTORY {lemonshark_demo_build_directory})
+            set(LEMONSHARK_DEMO_BINARY_BASE_DIRECTORY {lemonshark_demo_binary_base_directory})
 
             set(WIRESHARK_MAJOR_VERSION {wireshark_major_version})
             set(WIRESHARK_MINOR_VERSION {wireshark_minor_version})
@@ -221,8 +225,10 @@ def integrate_lemonshark():
             set(WIRESHARK_BINARY_BASE_DIRECTORY {wireshark_binary_base_directory})
 
             set(PYTHON_BASE_DIRECTORY {python_base_directory})
+            set(PYTHON_BUILD_DIRECTORY {python_build_directory})
 
             set(DOTNET_BASE_DIRECTORY {dotnet_base_directory})
+            set(DOTNET_BUILD_DIRECTORY {dotnet_build_directory})
 
             set(LEMONSHARK_SYSTEM {system})
             set(LEMONSHARK_ARCHITECTURE {architecture})
