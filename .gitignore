@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 *.swp
 
 [Nn]ative
+[Bb]uild
+[Ww]ireshark
+[Dd]ata

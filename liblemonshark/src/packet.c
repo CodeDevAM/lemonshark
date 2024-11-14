@@ -52,11 +52,7 @@ void ls_packet_free(packet_t *packet)
 	{
 		for (gint32 i = ls_packet_buffers_count(packet) - 1; i >= 0; i--)
 		{
-			buffer_t *buffer = ls_packet_buffers_remove(packet, i);
-			if (buffer != NULL)
-			{
-				ls_buffer_free(buffer);
-			}
+			ls_packet_buffers_remove(packet, i);
 		}
 
 		g_array_free(packet->buffers, TRUE);
@@ -134,7 +130,7 @@ field_t *ls_packet_root_field_get(packet_t *packet)
 
 void ls_packet_root_field_set(packet_t *packet, field_t *root_field)
 {
-
+	ls_field_external_ref_count_add(packet->root_field, -1);
 	ls_field_free(packet->root_field);
 	packet->root_field = root_field;
 }
@@ -253,6 +249,10 @@ buffer_t *ls_packet_buffers_get(packet_t *packet, gint32 id)
 
 void ls_packet_buffers_set(packet_t *packet, buffer_t *buffer, gint32 id)
 {
+	buffer_t* existing_buffer = g_array_index(packet->buffers, buffer_t*, id);
+	ls_buffer_external_ref_count_add(buffer, -1);
+	ls_buffer_free(existing_buffer);
+
 	g_array_index(packet->buffers, buffer_t *, id) = buffer;
 	ls_buffer_external_ref_count_add(buffer, 1);
 }
@@ -271,10 +271,11 @@ void ls_packet_buffers_add(packet_t *packet, buffer_t *buffer)
 	ls_buffer_external_ref_count_add(buffer, 1);
 }
 
-buffer_t *ls_packet_buffers_remove(packet_t *packet, gint32 id)
+void ls_packet_buffers_remove(packet_t *packet, gint32 id)
 {
 	buffer_t *buffer = g_array_index(packet->buffers, buffer_t *, id);
 	g_array_remove_index(packet->buffers, id);
 	ls_buffer_external_ref_count_add(buffer, -1);
+	ls_buffer_free(buffer);
 	return buffer;
 }

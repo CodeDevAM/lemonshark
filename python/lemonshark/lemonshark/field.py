@@ -126,7 +126,7 @@ class Field:
             liblemonshark.ls_field_children_add.restype = None
 
             liblemonshark.ls_field_children_remove.argtypes = [c_void_p, c_int32]
-            liblemonshark.ls_field_children_remove.restype = c_void_p
+            liblemonshark.ls_field_children_remove.restype = None
 
             liblemonshark.ls_field_get_name.argtypes = [c_int32]
             liblemonshark.ls_field_get_name.restype = c_char_p
@@ -428,18 +428,13 @@ class Field:
         liblemonshark: CDLL = Field.get_liblemonshark()
         liblemonshark.ls_field_children_add(self.c_field, child.c_field)
 
-    def remove_child(self, index: int) -> "Field":
+    def remove_child(self, index: int) -> None:
         children_count: int = self.children_count()
         if index < 0 or index >= children_count:
             raise Exception("index < 0 or index >= children_count")
 
         liblemonshark: CDLL = Field.get_liblemonshark()
-        c_child: int = liblemonshark.ls_field_children_remove(self.c_field, index)
-
-        if c_child is None or c_child == 0:
-            return None
-        child: Field = Field(c_void_p(c_child))
-        return child
+        liblemonshark.ls_field_children_remove(self.c_field, index)
 
     def get_name_from_id(field_id: int) -> str:
         liblemonshark: CDLL = Field.get_liblemonshark()

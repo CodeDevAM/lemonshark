@@ -125,7 +125,7 @@ extern "C"
 
     WS_DLL_PUBLIC void ls_field_children_add(field_t *field, field_t *child);
 
-    WS_DLL_PUBLIC field_t *ls_field_children_remove(field_t *field, gint32 index);
+    WS_DLL_PUBLIC void ls_field_children_remove(field_t *field, gint32 index);
 
     WS_DLL_PUBLIC gint32 ls_field_type_int8(void);
 

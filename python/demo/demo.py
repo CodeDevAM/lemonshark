@@ -16,7 +16,7 @@ lemonshark_directory: str = os.path.dirname(os.path.realpath(__file__)) + f"/../
 lemonshark_directory = os.path.realpath(lemonshark_directory)
 sys.path.append(lemonshark_directory)
 
-from lemonshark import LemonShark, Session, Packet, Field, Buffer
+from lemonshark import LemonShark, Session, Packet, Field, Buffer, Filter
 
 
 def print_fields(field: Field, indentation_count: int) -> None:
@@ -125,7 +125,12 @@ def main():
     LemonShark.init([wireshark_directory])
 
     trace_file_path: str = os.environ["LS_EXAMPLE_FILE"]
+
     session: Session = Session.create_from_file(trace_file_path, "frame.len < 150")
+
+    # Test filter
+    (is_valid, error_message) = Filter.is_valid("frame.len < 150")
+    (is_valid, error_message) = Filter.is_valid("frame.len ! 150")
 
     packets: List[Packet] = []
     try:

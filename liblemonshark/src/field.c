@@ -38,7 +38,7 @@ void ls_field_free(field_t *field)
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -48,11 +48,7 @@ void ls_field_free(field_t *field)
     {
         for (gint32 i = ls_field_children_count(field) - 1; i >= 0; i--)
         {
-            field_t *child = ls_field_children_remove(field, i);
-            if(child != NULL)
-            {
-                ls_field_free(child);
-            }
+            ls_field_children_remove(field, i);
         }
 
         g_array_free(field->children, TRUE);
@@ -177,7 +173,7 @@ gint32 ls_field_value_set_int64(field_t *field, const gint64 value, const gint32
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -205,7 +201,7 @@ gint32 ls_field_value_set_uint64(field_t *field, const guint64 value, const gint
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -234,7 +230,7 @@ gint32 ls_field_value_set_double(field_t *field, const double value, const gint3
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -262,7 +258,7 @@ gint32 ls_field_value_set_string(field_t *field, const char *value, const gint32
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -285,7 +281,7 @@ gint32 ls_field_value_take_string(field_t *field, const char *value, const gint3
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -313,7 +309,7 @@ gint32 ls_field_value_set_bytes(field_t *field, const guint8 *value, gint32 leng
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -336,7 +332,7 @@ gint32 ls_field_value_take_bytes(field_t *field, const guint8 *value, gint32 len
 
     if (field->value_requires_free)
     {
-        if (field->value.pointer != 0)
+        if (field->value.pointer != NULL)
         {
             g_free(field->value.pointer);
         }
@@ -379,6 +375,10 @@ field_t *ls_field_children_get(field_t *field, gint32 index)
 
 void ls_field_children_set(field_t *field, field_t *child, gint32 index)
 {
+    field_t* existing_child = g_array_index(field->children, field_t*, index);
+    ls_field_external_ref_count_add(existing_child, -1);
+    ls_field_free(existing_child);
+
     g_array_index(field->children, field_t *, index) = child;
     ls_field_external_ref_count_add(child, 1);
 }
@@ -397,11 +397,12 @@ void ls_field_children_add(field_t *field, field_t *child)
     ls_field_external_ref_count_add(child, 1);
 }
 
-field_t *ls_field_children_remove(field_t *field, gint32 index)
+void ls_field_children_remove(field_t *field, gint32 index)
 {
     field_t *child = g_array_index(field->children, field_t *, index);
     g_array_remove_index(field->children, index);
     ls_field_external_ref_count_add(child, -1);
+    ls_field_free(child);
     return child;
 }
 
@@ -662,7 +663,14 @@ gint32 ls_field_encoding_little_endian(void)
 
 gint32 ls_field_type_is_int64(gint32 field_type)
 {
-    gint32 result = field_type == FT_INT8 || field_type == FT_INT16 || field_type == FT_INT24 || field_type == FT_INT32 || field_type == FT_INT40 || field_type == FT_INT48 || field_type == FT_INT56 || field_type == FT_INT64;
+    gint32 result = field_type == FT_INT8 
+        || field_type == FT_INT16 
+        || field_type == FT_INT24 
+        || field_type == FT_INT32 
+        || field_type == FT_INT40 
+        || field_type == FT_INT48 
+        || field_type == FT_INT56 
+        || field_type == FT_INT64;
 
     result = result ? 1 : 0;
     return result;
@@ -670,7 +678,24 @@ gint32 ls_field_type_is_int64(gint32 field_type)
 
 gint32 ls_field_type_is_uint64(gint32 field_type)
 {
-    gint32 result = field_type == FT_UINT8 || field_type == FT_UINT16 || field_type == FT_UINT24 || field_type == FT_UINT32 || field_type == FT_UINT40 || field_type == FT_UINT48 || field_type == FT_UINT56 || field_type == FT_UINT64 || field_type == FT_BOOLEAN || field_type == FT_CHAR || field_type == FT_IEEE_11073_SFLOAT || field_type == FT_IEEE_11073_FLOAT || field_type == FT_IPXNET || field_type == FT_FRAMENUM || field_type == FT_EUI64 || field_type == FT_IPv4 || field_type == FT_NUM_TYPES || field_type == FT_SCALAR;
+    gint32 result = field_type == FT_UINT8 
+        || field_type == FT_UINT16 
+        || field_type == FT_UINT24 
+        || field_type == FT_UINT32 
+        || field_type == FT_UINT40 
+        || field_type == FT_UINT48 
+        || field_type == FT_UINT56 
+        || field_type == FT_UINT64 
+        || field_type == FT_BOOLEAN 
+        || field_type == FT_CHAR 
+        || field_type == FT_IEEE_11073_SFLOAT 
+        || field_type == FT_IEEE_11073_FLOAT 
+        || field_type == FT_IPXNET 
+        || field_type == FT_FRAMENUM 
+        || field_type == FT_EUI64 
+        || field_type == FT_IPv4 
+        || field_type == FT_NUM_TYPES 
+        || field_type == FT_SCALAR;
 
     result = result ? 1 : 0;
     return result;
@@ -678,7 +703,10 @@ gint32 ls_field_type_is_uint64(gint32 field_type)
 
 gint32 ls_field_type_is_double(gint32 field_type)
 {
-    gint32 result = field_type == FT_FLOAT || field_type == FT_DOUBLE || field_type == FT_ABSOLUTE_TIME || field_type == FT_RELATIVE_TIME;
+    gint32 result = field_type == FT_FLOAT 
+        || field_type == FT_DOUBLE 
+        || field_type == FT_ABSOLUTE_TIME 
+        || field_type == FT_RELATIVE_TIME;
 
     result = result ? 1 : 0;
     return result;
@@ -686,7 +714,8 @@ gint32 ls_field_type_is_double(gint32 field_type)
 
 gint32 ls_field_type_is_string(gint32 field_type)
 {
-    gint32 result = FT_IS_STRING(field_type) || field_type == FT_NONE;
+    gint32 result = FT_IS_STRING(field_type) 
+        || field_type == FT_NONE;
 
     result = result ? 1 : 0;
     return result;
@@ -694,7 +723,17 @@ gint32 ls_field_type_is_string(gint32 field_type)
 
 gint32 ls_field_type_is_bytes(gint32 field_type)
 {
-    gint32 result = field_type == FT_ETHER || field_type == FT_BYTES || field_type == FT_UINT_BYTES || field_type == FT_IPv6 || field_type == FT_GUID || field_type == FT_OID || field_type == FT_VINES || field_type == FT_REL_OID || field_type == FT_SYSTEM_ID || field_type == FT_FCWWN || field_type == FT_PROTOCOL;
+    gint32 result = field_type == FT_ETHER 
+        || field_type == FT_BYTES 
+        || field_type == FT_UINT_BYTES 
+        || field_type == FT_IPv6 
+        || field_type == FT_GUID 
+        || field_type == FT_OID 
+        || field_type == FT_VINES 
+        || field_type == FT_REL_OID 
+        || field_type == FT_SYSTEM_ID 
+        || field_type == FT_FCWWN 
+        || field_type == FT_PROTOCOL;
 
     result = result ? 0 : 1;
     return result;

@@ -15,7 +15,6 @@ static void handle_error(const char *error_message)
 
 static void print_fields(field_t *field, gint32 indentation_count)
 {
-
     const char *representation = ls_field_representation_get(field);
     if (representation != NULL)
     {
@@ -162,7 +161,8 @@ int main(void)
     g_print("1. Session\n");
 
     const char *trace_file_path = g_getenv("LS_EXAMPLE_FILE");
-    char *error_message = NULL;
+
+    char* error_message = NULL;
     gint32 init_result = ls_session_create_from_file(trace_file_path, "frame.len < 150", &error_message);
 
     if (init_result == LS_ERROR)
@@ -172,11 +172,18 @@ int main(void)
         return -1;
     }
 
-    GPtrArray *packets = g_ptr_array_new();
+    // Test filter
+    error_message = NULL;
+    gint32 is_valid_filter = ls_filter_is_valid("frame.len < 150", &error_message);
+    error_message = NULL;
+    is_valid_filter = ls_filter_is_valid("frame.len ! 150", &error_message);
+
+    GPtrArray* packets = g_ptr_array_new();
 
     gint32 packet_id = 0;
     while (TRUE)
     {
+        error_message = NULL;
         packet_id = ls_session_get_next_packet_id(&error_message);
 
         if (packet_id < 0)
@@ -188,7 +195,8 @@ int main(void)
             continue;
         }
 
-        packet_t *packet = ls_session_get_packet(packet_id, TRUE, TRUE, TRUE, TRUE, TRUE, &error_message);
+        error_message = NULL;
+        packet_t* packet = ls_session_get_packet(packet_id, TRUE, TRUE, TRUE, TRUE, TRUE, &error_message);
 
         if (packet == NULL)
         {
@@ -208,67 +216,15 @@ int main(void)
 
     for (guint i = 0; i < g_ptr_array_len(packets); i++)
     {
-        packet_t *packet = g_ptr_array_index(packets, i);
+        packet_t* packet = g_ptr_array_index(packets, i);
         ls_packet_free(packet);
     }
 
     g_ptr_array_free(packets, TRUE);
 
     ls_session_close();
-
-    g_print("1. Session closed\n");
-    g_print("2. Session\n");
-
-    ls_session_create_from_file(trace_file_path, "frame.len < 300", &error_message);
-
-    packets = g_ptr_array_new();
-
-    packet_id = 0;
-
-    while (TRUE)
-    {
-        packet_id = ls_session_get_next_packet_id(&error_message);
-
-        if (packet_id < 0)
-        {
-            break;
-        }
-        if (packet_id == 0)
-        {
-            continue;
-        }
-
-        packet_t *packet = ls_session_get_packet(packet_id, TRUE, TRUE, TRUE, TRUE, TRUE, &error_message);
-
-        if (packet == NULL)
-        {
-            if (error_message != NULL)
-            {
-                g_print("%s", error_message);
-                g_free(error_message);
-            }
-
-            break;
-        }
-
-        print_packet(packet);
-
-        g_ptr_array_add(packets, packet);
-    }
-
-    for (guint i = 0; i < g_ptr_array_len(packets); i++)
-    {
-        packet_t *packet = g_ptr_array_index(packets, i);
-        ls_packet_free(packet);
-    }
-
-    g_ptr_array_free(packets, TRUE);
 
     ls_error_handler_remove(error_handler);
-
-    ls_session_close();
-
-    g_print("2. Session closed\n");
 
     return 0;
 }

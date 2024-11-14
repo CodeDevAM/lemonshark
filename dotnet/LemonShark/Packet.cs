@@ -311,9 +311,9 @@ public class Packet
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern IntPtr ls_packet_buffers_remove(IntPtr packet, int bufferId);
+    private static extern void ls_packet_buffers_remove(IntPtr packet, int bufferId);
 
-    public Buffer RemoveBuffer(int bufferId)
+    public void RemoveBuffer(int bufferId)
     {
         int buffersCount = BuffersCount;
         if (bufferId < 0 || bufferId >= buffersCount)
@@ -321,15 +321,7 @@ public class Packet
             throw new ArgumentOutOfRangeException(nameof(bufferId));
         }
 
-        IntPtr bufferReference = ls_packet_buffers_remove(PacketReference, bufferId);
-
-        if (bufferReference == IntPtr.Zero)
-        {
-            return null;
-        }
-
-        Buffer removedBuffer = new(bufferReference);
-        return removedBuffer;
+        ls_packet_buffers_remove(PacketReference, bufferId);
     }
 
 }

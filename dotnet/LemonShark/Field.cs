@@ -405,9 +405,9 @@ public class Field
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern IntPtr ls_field_children_remove(IntPtr field, int index);
+    private static extern void ls_field_children_remove(IntPtr field, int index);
 
-    public Field RemoveChild(int index)
+    public void RemoveChild(int index)
     {
         int childrenCount = ChildrenCount;
         if (index < 0 || index >= childrenCount)
@@ -415,15 +415,7 @@ public class Field
             throw new ArgumentOutOfRangeException(nameof(index));
         }
 
-        IntPtr childReference = ls_field_children_remove(FieldReference, index);
-
-        if (childReference == IntPtr.Zero)
-        {
-            return null;
-        }
-
-        Field removedChild = new(childReference);
-        return removedChild;
+        ls_field_children_remove(FieldReference, index);
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]

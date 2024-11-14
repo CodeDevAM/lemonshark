@@ -10,3 +10,4 @@ from .packet import Packet
 from .field import Field, FieldType
 from .encoding import Encoding
 from .buffer import Buffer
+from .filter import Filter

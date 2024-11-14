@@ -25,6 +25,7 @@ extern "C"
 #include "field.h"
 #include "buffer.h"
 #include "session.h"
+#include "filter.h"
 
 #ifdef __cplusplus
 }

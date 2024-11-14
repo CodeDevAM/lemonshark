@@ -108,7 +108,7 @@ extern "C"
 
     WS_DLL_PUBLIC void ls_packet_buffers_add(packet_t *packet, buffer_t *buffer);
 
-    WS_DLL_PUBLIC buffer_t *ls_packet_buffers_remove(packet_t *packet, gint32 id);
+    WS_DLL_PUBLIC void ls_packet_buffers_remove(packet_t *packet, gint32 id);
 
 #ifdef __cplusplus
 }

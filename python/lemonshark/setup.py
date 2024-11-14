@@ -14,7 +14,7 @@ with open(path.join(working_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="lemonshark",
-    version="0.1.2",
+    version="0.2.0",
     description="lemonshark allows to use Wireshark as a library in an python application",
     long_description=long_description,
     long_description_content_type="text/markdown",

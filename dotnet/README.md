@@ -1,6 +1,6 @@
 # LemonShark
 
-![icon](./../icon.png "lemonshark")
+![icon](https://github.com/CodeDevAM/lemonshark/blob/main/icon.png?raw=true)
 
 LemonShark allows to use Wireshark as a library in an C#/.NET application.
 

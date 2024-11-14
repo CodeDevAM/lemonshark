@@ -39,6 +39,11 @@ public class Session : IDisposable
             throw new Exception(message);
         }
 
+        if (errorMessage != IntPtr.Zero)
+        {
+            LemonShark.FreeMemory(errorMessage);
+        }
+        
         Session session = new();
 
         _CurrentSession = session;
@@ -90,6 +95,11 @@ public class Session : IDisposable
 
             return false;
         }
+        
+        if (errorMessage != IntPtr.Zero)
+        {
+            LemonShark.FreeMemory(errorMessage);
+        }
 
         return true;
     }
@@ -127,6 +137,11 @@ public class Session : IDisposable
                 LemonShark.FreeMemory(errorMessage);
             }
             throw new Exception(message);
+        }
+        
+        if (errorMessage != IntPtr.Zero)
+        {
+            LemonShark.FreeMemory(errorMessage);
         }
 
         Packet packet = new(packetReference);

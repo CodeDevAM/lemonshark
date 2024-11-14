@@ -57,6 +57,9 @@ class Session:
                 LemonShark.free_memory(c_error_message)
             raise Exception(error_message)
 
+        if c_error_message.value is not None and c_error_message.value != 0:
+            LemonShark.free_memory(c_error_message)
+
         session: Session = Session()
         Session.__current_session = session
 
@@ -80,17 +83,18 @@ class Session:
         liblemonshark: CDLL = Session.get_liblemonshark()
 
         c_error_message = c_void_p()
-        packet_id: int = liblemonshark.ls_session_get_next_packet_id(
-            byref(c_error_message)
-        )
+        packet_id: int = liblemonshark.ls_session_get_next_packet_id(byref(c_error_message))
 
         if packet_id < 0:
             error_message: str = ""
-            # if not error message is given we assume as regular finish without a failure
+            # if no error message is given we assume as regular finish without a failure
             if c_error_message.value is not None and c_error_message.value != 0:
                 error_message: str = string_at(c_error_message.value).decode("utf-8")
                 LemonShark.free_memory(c_error_message)
                 raise Exception(error_message)
+
+        if c_error_message.value is not None and c_error_message.value != 0:
+            LemonShark.free_memory(c_error_message)
 
         return packet_id
 
@@ -125,6 +129,9 @@ class Session:
                 error_message: str = string_at(c_error_message.value).decode("utf-8")
                 LemonShark.free_memory(c_error_message)
             raise Exception(error_message)
+
+        if c_error_message.value is not None and c_error_message.value != 0:
+            LemonShark.free_memory(c_error_message)
 
         packet: Packet = Packet(c_void_p(c_packet))
         return packet

@@ -1,6 +1,6 @@
 # lemonshark
 
-![icon](./../../icon.png "lemonshark")
+![icon](https://github.com/CodeDevAM/lemonshark/blob/main/icon.png?raw=true)
 
 lemonshark allows to use Wireshark as a library in an python application.
 

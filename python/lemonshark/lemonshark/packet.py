@@ -113,7 +113,7 @@ class Packet:
             liblemonshark.ls_packet_buffers_add.restype = None
 
             liblemonshark.ls_packet_buffers_remove.argtypes = [c_void_p, c_int32]
-            liblemonshark.ls_packet_buffers_remove.restype = c_void_p
+            liblemonshark.ls_packet_buffers_remove.restype = None
 
             Packet.__liblemonshark_initialized = True
 
@@ -338,15 +338,10 @@ class Packet:
         liblemonshark: CDLL = Packet.get_liblemonshark()
         liblemonshark.ls_packet_buffers_add(self.c_packet, buffer.c_buffer)
 
-    def remove_buffer(self, buffer_id: int) -> Buffer:
+    def remove_buffer(self, buffer_id: int) -> None:
         buffers_count: int = self.buffers_count()
         if buffer_id < 0 or buffer_id >= buffers_count:
             raise Exception("buffer_id < 0 or buffer_id >= buffers_count")
 
         liblemonshark: CDLL = Packet.get_liblemonshark()
-        c_buffer: int = liblemonshark.ls_packet_buffers_remove(self.c_packet, buffer_id)
-
-        if c_buffer is None or c_buffer == 0:
-            return None
-        buffer: Buffer = Buffer(c_void_p(c_buffer))
-        return buffer
+        liblemonshark.ls_packet_buffers_remove(self.c_packet, buffer_id)

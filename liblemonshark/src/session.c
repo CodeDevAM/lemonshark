@@ -335,12 +335,12 @@ gint32 ls_session_create_from_file(const char *file_path, const char *read_filte
         ls_get_interface_description,
         ls_get_modified_block};
 
-    cap_file->epan = epan_new(&cap_file->provider, &funcs);
+    epan_t* epan = epan_new(&cap_file->provider, &funcs);
+    cap_file->epan = epan;
 
     gboolean create_proto_tree = TRUE;
 
-    session->epan_dissect = epan_dissect_new(session->cap_file->epan, create_proto_tree, TRUE);
-    epan_dissect_init(session->epan_dissect, session->cap_file->epan, create_proto_tree, TRUE);
+    session->epan_dissect = epan_dissect_new(epan, create_proto_tree, TRUE);
 
     cap_file->state = FILE_READ_IN_PROGRESS;
 
@@ -396,6 +396,8 @@ gint32 ls_session_get_next_packet_id(char **error_message)
         epan_dissect_prime_with_dfilter(epan_dissect, cap_file->rfcode);
     }
 
+    prime_epan_dissect_with_postdissector_wanted_hfids(epan_dissect);
+
     frame_data_set_before_dissect(&current_frame_data, &cap_file->elapsed_time, &cap_file->provider.ref, cap_file->provider.prev_dis);
     if (cap_file->provider.ref == &current_frame_data)
     {
@@ -416,10 +418,10 @@ gint32 ls_session_get_next_packet_id(char **error_message)
 
     epan_dissect_reset(epan_dissect);
 
+    gint32 packet_id = 0;
     if (passed == FALSE)
     {
         frame_data_destroy(&current_frame_data);
-        return 0;
     }
     else
     {
@@ -427,9 +429,10 @@ gint32 ls_session_get_next_packet_id(char **error_message)
         cap_file->provider.prev_cap = cap_file->provider.prev_dis = frame_data_sequence_add(cap_file->provider.frames, &current_frame_data);
         cap_file->count++;
 
-        gint32 packet_id = (gint32)cap_file->count;
-        return packet_id;
+        packet_id = (gint32)cap_file->count;
     }
+
+    return packet_id;
 }
 
 packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, const gint32 include_columns, const gint32 include_representations, const gint32 include_strings, const gint32 include_bytes, char **error_message)
