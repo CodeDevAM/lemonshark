@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
@@ -11,15 +12,15 @@
     <Authors>DevAM</Authors>
     <Company>DevAM</Company>
     <Product>LemonShark</Product>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Description>Wireshark bindings for C# and .NET.</Description>
-	  <Copyright>Copyright (c) 2024 DevAM. All Rights Reserved.</Copyright>
+    <Copyright>Copyright (c) 2024 DevAM. All Rights Reserved.</Copyright>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Wireshark</PackageTags>
-    <AssemblyVersion>0.2.0</AssemblyVersion>
-    <FileVersion>0.2.0</FileVersion>
+    <AssemblyVersion>0.3.0</AssemblyVersion>
+    <FileVersion>0.3.0</FileVersion>
     <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <AssemblyName>LemonShark</AssemblyName>
@@ -31,13 +32,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
+    <None
+      Include="../../icon.png"
+      Pack="true"
+      PackagePath="/"
+      CopyToOutputDirectory="PreserveNewest" />
+    <None
+      Include="../README.md"
+      Pack="true"
+      PackagePath="/"
+      CopyToOutputDirectory="PreserveNewest">
     </None>
   </ItemGroup>
 

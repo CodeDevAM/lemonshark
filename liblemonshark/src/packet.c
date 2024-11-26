@@ -277,5 +277,4 @@ void ls_packet_buffers_remove(packet_t *packet, gint32 id)
 	g_array_remove_index(packet->buffers, id);
 	ls_buffer_external_ref_count_add(buffer, -1);
 	ls_buffer_free(buffer);
-	return buffer;
 }

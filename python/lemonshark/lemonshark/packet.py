@@ -345,3 +345,11 @@ class Packet:
 
         liblemonshark: CDLL = Packet.get_liblemonshark()
         liblemonshark.ls_packet_buffers_remove(self.c_packet, buffer_id)
+
+    def get_children(self) -> List["Buffer"]:
+        result: List["Buffer"] = []
+        buffers_count: int = self.buffers_count()
+        for i in range(buffers_count):
+            buffer: "Buffer" = self.get_buffer(i)
+            result.append(buffer)
+        return result

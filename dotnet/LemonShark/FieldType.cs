@@ -252,6 +252,10 @@ public class FieldType
 
     public static string GetName(int fieldType)
     {
+        if (fieldType < 0 || fieldType >= NumTypes)
+        {
+            return null;
+        }
         IntPtr nameReference = ls_field_type_get_name(fieldType);
         if (nameReference == IntPtr.Zero)
         {

@@ -1,6 +1,6 @@
 # lemonshark
 
-![icon](https://github.com/CodeDevAM/lemonshark/blob/main/icon.png?raw=true)
+![icon](https://raw.githubusercontent.com/CodeDevAM/lemonshark/main/icon.png)
 
 lemonshark allows to use Wireshark as a library.
 

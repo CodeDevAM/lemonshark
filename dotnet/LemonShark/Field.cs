@@ -51,7 +51,7 @@ public class Field
     private static extern IntPtr ls_field_representation_get(IntPtr field);
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern void ls_field_representation_set(IntPtr field, [MarshalAs(UnmanagedType.LPStr)] string representation);
+    private static extern void ls_field_representation_set(IntPtr field, IntPtr representation);
 
     public string Representation
     {
@@ -65,7 +65,18 @@ public class Field
             string result = Util.NativeUtf8ToString(representationReference);
             return result;
         }
-        set => ls_field_representation_set(FieldReference, value);
+        set
+        {
+            IntPtr utf8Value = Util.StringToNativeUtf8(value);
+            try
+            {
+                ls_field_representation_set(FieldReference, utf8Value);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(utf8Value);
+            }
+        }
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -253,7 +264,7 @@ public class Field
     private static extern IntPtr ls_field_value_get_string(IntPtr field);
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern int ls_field_value_set_string(IntPtr field, [MarshalAs(UnmanagedType.LPStr)] string value, int type);
+    private static extern int ls_field_value_set_string(IntPtr field, IntPtr value, int type);
 
     public string GetStringValue()
     {
@@ -273,11 +284,24 @@ public class Field
 
     public void SetStringValue(string value, int type)
     {
-        int setResult = ls_field_value_set_string(FieldReference, value, type);
+        IntPtr utf8Value = Util.StringToNativeUtf8(value);
+
+        int setResult = 0;
+        try
+        {
+            setResult = ls_field_value_set_string(FieldReference, utf8Value, type);
+
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(utf8Value);
+        }
+
         if (setResult == LemonShark.Error)
         {
             throw new InvalidOperationException("Invalid type");
         }
+
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -418,11 +442,31 @@ public class Field
         ls_field_children_remove(FieldReference, index);
     }
 
+    public List<Field> Children
+    {
+        get
+        {
+            List<Field> result = [];
+            int childrenCount = ChildrenCount;
+            for (int i = 0; i < childrenCount; i++)
+            {
+                Field child = GetChild(i);
+                result.Add(child);
+            }
+            return result;
+        }
+    }
+
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr ls_field_get_name(int field_id);
 
     public static string GetName(int fieldId)
     {
+        if (fieldId <= 0)
+        {
+            return null;
+        }
+
         IntPtr nameReference = ls_field_get_name(fieldId);
         if (nameReference == IntPtr.Zero)
         {
@@ -439,6 +483,11 @@ public class Field
 
     public static string GetDisplayName(int fieldId)
     {
+        if (fieldId <= 0)
+        {
+            return null;
+        }
+
         IntPtr displayNameReference = ls_field_get_display_name(fieldId);
         if (displayNameReference == IntPtr.Zero)
         {

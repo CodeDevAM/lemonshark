@@ -16,7 +16,7 @@ public class Session : IDisposable
 
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern int ls_session_create_from_file([MarshalAs(UnmanagedType.LPStr)] string filePath, [MarshalAs(UnmanagedType.LPStr)] string readFilter, ref IntPtr errorMessage);
+    private static extern int ls_session_create_from_file(IntPtr filePath, IntPtr readFilter, ref IntPtr errorMessage);
 
     public static Session CreateFromFile(string filePath, string readFilter)
     {
@@ -25,8 +25,22 @@ public class Session : IDisposable
             throw new InvalidOperationException("There can only be one session at a time.");
         }
 
+        IntPtr utf8FilePath = Util.StringToNativeUtf8(filePath);
+
+        IntPtr utf8ReadFilter = Util.StringToNativeUtf8(readFilter);
+
         IntPtr errorMessage = default;
-        int creationResult = ls_session_create_from_file(filePath, readFilter, ref errorMessage);
+        int creationResult = 0;
+
+        try
+        {
+            creationResult = ls_session_create_from_file(utf8FilePath, utf8ReadFilter, ref errorMessage);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(utf8FilePath);
+            Marshal.FreeHGlobal(utf8ReadFilter);
+        }
 
         if (creationResult == LemonShark.Error)
         {

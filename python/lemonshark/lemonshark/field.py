@@ -436,7 +436,18 @@ class Field:
         liblemonshark: CDLL = Field.get_liblemonshark()
         liblemonshark.ls_field_children_remove(self.c_field, index)
 
+    def get_children(self) -> List["Field"]:
+        result: List["Field"] = []
+        children_count: int = self.children_count()
+        for i in range(children_count):
+            child: "Field" = self.get_child(i)
+            result.append(child)
+        return result
+
     def get_name_from_id(field_id: int) -> str:
+        if field_id <= 0:
+            return None
+        
         liblemonshark: CDLL = Field.get_liblemonshark()
         c_name: bytes = liblemonshark.ls_field_get_name(field_id)
 
@@ -452,6 +463,9 @@ class Field:
         return name
 
     def get_display_name_from_id(field_id: int) -> str:
+        if field_id <= 0:
+            return None
+        
         liblemonshark: CDLL = Field.get_liblemonshark()
         c_display_name: bytes = liblemonshark.ls_field_get_display_name(field_id)
 
@@ -812,6 +826,9 @@ class FieldType:
         return liblemonshark.ls_field_type_is_bytes(field_type) != 0
 
     def get_name(field_type: int) -> str:
+        if field_type < 0 or field_type >= FieldType.num_types():
+            return None
+        
         liblemonshark: CDLL = FieldType.get_liblemonshark()
         c_name: bytes = liblemonshark.ls_field_type_get_name(field_type)
 

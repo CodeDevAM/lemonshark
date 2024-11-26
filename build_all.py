@@ -7,7 +7,7 @@ os.system(f"""python build.py""")
 os.system(f"""wsl python3 ./build.py""")
 
 os.chdir(f"""./dotnet/LemonShark""")
-os.system(f"""dotnet build -c Release -o ../../build/dotnet/LemonShark/Release""")
+os.system(f"""dotnet build -c Release -p:PlatformTarget=AnyCPU -o ../../build/dotnet/LemonShark/Release""")
 os.chdir(original_current_working_dir)
 
 os.chdir(f"""./python/lemonshark""")

@@ -47,7 +47,6 @@ SPDX-License-Identifier: GPL-2.0-only
 typedef struct
 {
     capture_file *cap_file;
-    epan_dissect_t *epan_dissect;
     char *read_filter;
     guint32 cum_bytes;
     frame_data ref_frame;
@@ -338,10 +337,6 @@ gint32 ls_session_create_from_file(const char *file_path, const char *read_filte
     epan_t* epan = epan_new(&cap_file->provider, &funcs);
     cap_file->epan = epan;
 
-    gboolean create_proto_tree = TRUE;
-
-    session->epan_dissect = epan_dissect_new(epan, create_proto_tree, TRUE);
-
     cap_file->state = FILE_READ_IN_PROGRESS;
 
     wtap_set_cb_new_ipv4(cap_file->provider.wth, add_ipv4_name);
@@ -374,7 +369,7 @@ gint32 ls_session_get_next_packet_id(char **error_message)
 
     capture_file *cap_file = session->cap_file;
     wtap_rec *rec = &cap_file->rec;
-    epan_dissect_t *epan_dissect = session->epan_dissect;
+    epan_dissect_t* epan_dissect = epan_dissect_new(cap_file->epan, TRUE, TRUE);
     Buffer *buffer = &cap_file->buf;
 
     wtap_rec_reset(rec);
@@ -416,7 +411,7 @@ gint32 ls_session_get_next_packet_id(char **error_message)
         passed = dfilter_apply_edt(cap_file->rfcode, epan_dissect);
     }
 
-    epan_dissect_reset(epan_dissect);
+    epan_dissect_free(epan_dissect);
 
     gint32 packet_id = 0;
     if (passed == FALSE)
@@ -449,7 +444,7 @@ packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, 
 
     capture_file *cap_file = session->cap_file;
     wtap_rec *rec = &cap_file->rec;
-    epan_dissect_t *epan_dissect = session->epan_dissect;
+    epan_dissect_t *epan_dissect = epan_dissect_new(cap_file->epan, TRUE, TRUE);
     Buffer *buffer = &cap_file->buf;
 
     frame_data *current_frame_data = frame_data_sequence_find(cap_file->provider.frames, packet_id);
@@ -479,6 +474,13 @@ packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, 
 
     tvbuff_t *tvbuffer = frame_tvbuff_new_buffer(&cap_file->provider, current_frame_data, buffer);
 
+    if (cap_file->rfcode != NULL)
+    {
+        epan_dissect_prime_with_dfilter(epan_dissect, cap_file->rfcode);
+    }
+
+    prime_epan_dissect_with_postdissector_wanted_hfids(epan_dissect);
+
     epan_dissect_run_with_taps(epan_dissect, cap_file->cd_t, rec, tvbuffer, current_frame_data, cinfo);
 
     packet_info *current_packet_info = &epan_dissect->pi;
@@ -486,6 +488,8 @@ packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, 
     tvbuff_t *packet_buffer = epan_dissect->tvb;
 
     packet_t *packet = ls_packet_new_from_packet_info(current_packet_info, tree, packet_buffer, include_buffers, include_columns, include_representations, include_strings, include_bytes);
+
+    epan_dissect_free(epan_dissect);
 
     return packet;
 }
@@ -761,7 +765,7 @@ void ls_field_value_set_from_ftvalue(field_t *field, const field_info *current_f
     {
         if (include_bytes)
         {
-            guint64 protocol_length = (guint64)fvalue_length2(current_field_info->value);
+            gint32 protocol_length = (gint32)(fvalue_length2(current_field_info->value) & 0x7FFFFFFF);
             if (protocol_length > 0)
             {
                 tvbuff_t *buffer = fvalue_get_protocol(current_field_info->value);
@@ -818,9 +822,6 @@ void ls_session_close(void)
     }
 
     postseq_cleanup_all_protocols();
-
-    epan_dissect_free(session->epan_dissect);
-    session->epan_dissect = NULL;
 
     capture_file *cap_file = session->cap_file;
 

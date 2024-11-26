@@ -403,7 +403,6 @@ void ls_field_children_remove(field_t *field, gint32 index)
     g_array_remove_index(field->children, index);
     ls_field_external_ref_count_add(child, -1);
     ls_field_free(child);
-    return child;
 }
 
 gint32 ls_field_type_int8(void)
@@ -714,7 +713,12 @@ gint32 ls_field_type_is_double(gint32 field_type)
 
 gint32 ls_field_type_is_string(gint32 field_type)
 {
-    gint32 result = FT_IS_STRING(field_type) 
+    gint32 result = field_type == FT_STRING 
+        || field_type == FT_STRINGZ 
+        || field_type == FT_STRINGZPAD 
+        || field_type == FT_STRINGZTRUNC 
+        || field_type == FT_UINT_STRING 
+        || field_type == FT_AX25
         || field_type == FT_NONE;
 
     result = result ? 1 : 0;
@@ -735,12 +739,16 @@ gint32 ls_field_type_is_bytes(gint32 field_type)
         || field_type == FT_FCWWN 
         || field_type == FT_PROTOCOL;
 
-    result = result ? 0 : 1;
+    result = result ? 1 : 0;
     return result;
 }
 
 const char *ls_field_type_get_name(gint32 field_type)
 {
+    if (field_type < 0 || field_type  >= FT_NUM_TYPES)
+    {
+        return NULL;
+    }
     const char *name = ftype_name((ftenum_t)field_type);
 
     return name;
@@ -748,6 +756,11 @@ const char *ls_field_type_get_name(gint32 field_type)
 
 const char *ls_field_get_name(gint32 field_id)
 {
+    if (field_id <= 0)
+    {
+        return NULL;
+    }
+
     const char *name = proto_registrar_get_abbrev(field_id);
 
     return name;
@@ -755,6 +768,11 @@ const char *ls_field_get_name(gint32 field_id)
 
 const char *ls_field_get_display_name(gint32 field_id)
 {
+    if (field_id <= 0)
+    {
+        return NULL;
+    }
+
     const char *display_name = proto_registrar_get_name(field_id);
 
     return display_name;

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LemonShark.Demo": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -16,19 +16,14 @@ namespace LemonShark
             {
                 return null;
             }
+            string result = Marshal.PtrToStringUTF8(nativeStringReference);
 
-            int length = 0;
-            while (Marshal.ReadByte(nativeStringReference, length) != 0) length++;
+            return result;
+        }
 
-            if (length == 1)
-            {
-                return "";
-            }
-
-            byte[] buffer = new byte[length];
-            Marshal.Copy(nativeStringReference, buffer, 0, buffer.Length);
-            string result = System.Text.Encoding.UTF8.GetString(buffer);
-
+        internal static IntPtr StringToNativeUtf8(string value)
+        {
+            IntPtr result = Marshal.StringToCoTaskMemUTF8(value);
             return result;
         }
     }

@@ -56,7 +56,6 @@ public class Packet
             }
             ls_packet_id_set(PacketReference, value);
         }
-
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -89,7 +88,6 @@ public class Packet
             ls_packet_timestamp_nanoseconds_set(PacketReference, value);
         }
     }
-
     public double Timestamp => (double)TimestampSeconds + (double)TimestampNanoSeconds / 1000000000.0;
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -153,7 +151,7 @@ public class Packet
     private static extern IntPtr ls_packet_protocol_column_get(IntPtr packet);
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern void ls_packet_protocol_column_set(IntPtr packet, [MarshalAs(UnmanagedType.LPStr)] string protocolColumn);
+    private static extern void ls_packet_protocol_column_set(IntPtr packet, IntPtr protocolColumn);
 
     public string ProtocolColumn
     {
@@ -167,14 +165,26 @@ public class Packet
             string result = Util.NativeUtf8ToString(protocolColumnReference);
             return result;
         }
-        set => ls_packet_protocol_column_set(PacketReference, value);
+        set
+        {
+            IntPtr utf8Value = Util.StringToNativeUtf8(value);
+
+            try
+            {
+                ls_packet_protocol_column_set(PacketReference, utf8Value);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(utf8Value);
+            }
+        }
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr ls_packet_info_column_get(IntPtr packet);
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern void ls_packet_info_column_set(IntPtr packet, [MarshalAs(UnmanagedType.LPStr)] string infoColumn);
+    private static extern void ls_packet_info_column_set(IntPtr packet, IntPtr infoColumn);
 
     public string InfoColumn
     {
@@ -188,7 +198,19 @@ public class Packet
             string result = Util.NativeUtf8ToString(infoColumnReference);
             return result;
         }
-        set => ls_packet_info_column_set(PacketReference, value);
+        set
+        {
+            IntPtr utf8Value = Util.StringToNativeUtf8(value);
+
+            try
+            {
+                ls_packet_info_column_set(PacketReference, utf8Value);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(utf8Value);
+            }
+        }
     }
 
 
@@ -324,4 +346,18 @@ public class Packet
         ls_packet_buffers_remove(PacketReference, bufferId);
     }
 
+    public List<Buffer> Buffers
+    {
+        get
+        {
+            List<Buffer> result = [];
+            int buffersCount = BuffersCount;
+            for (int i = 0; i < buffersCount; i++)
+            {
+                Buffer buffer = GetBuffer(i);
+                result.Add(buffer);
+            }
+            return result;
+        }
+    }
 }

@@ -11,13 +11,24 @@ namespace LemonShark;
 public class Filter
 {
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern int ls_filter_is_valid([MarshalAs(UnmanagedType.LPStr)] string filter, ref IntPtr errorMessage);
+    private static extern int ls_filter_is_valid(IntPtr filter, ref IntPtr errorMessage);
 
     public static bool IsValid(string filter, out string errorMessage)
     {
         errorMessage = null;
         IntPtr errorMessageReference = default;
-        int creationResult = ls_filter_is_valid(filter, ref errorMessageReference);
+
+        IntPtr utf8Filter = Util.StringToNativeUtf8(filter);
+
+        int creationResult = 0;
+        try
+        {
+            creationResult = ls_filter_is_valid(utf8Filter, ref errorMessageReference);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(utf8Filter);
+        }
 
         bool result = true;
         if (creationResult == LemonShark.Error)

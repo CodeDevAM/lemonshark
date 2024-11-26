@@ -35,9 +35,9 @@ internal class Program
         }
 
         LemonShark.Init([wiresharkDirectory]);
-        
+
         using Session session = Session.CreateFromFile(traceFilePath, "frame.len < 150");
-        
+
         // Test filter
         bool isValidFilter = Filter.IsValid("frame.len < 150", out string errorMessage);
         isValidFilter = Filter.IsValid("frame.len ! 150", out errorMessage);
@@ -67,7 +67,7 @@ internal class Program
         GC.Collect();
     }
 
-    static void PrintPacket(Packet packet)
+    private static void PrintPacket(Packet packet)
     {
         Console.WriteLine($"Id: {packet.Id}: Timestamp: {packet.Timestamp}, Length: {packet.Length}, Buffers: {packet.BuffersCount}, Info: {packet.InfoColumn}");
 
@@ -96,7 +96,7 @@ internal class Program
         }
     }
 
-    static void PrintFields(Field field, int indentationCount)
+    private static void PrintFields(Field field, int indentationCount)
     {
         string representation = field.Representation;
         if (representation != null)

@@ -31,13 +31,13 @@ lemonshark_demo_build_directory: str = f"""{base_build_directory}/lemonshark_dem
 lemonshark_demo_binary_base_directory: str = f"""{lemonshark_demo_build_directory}/bin"""
 
 lemonshark_major_version: int = 0
-lemonshark_minor_version: int = 2
+lemonshark_minor_version: int = 3
 lemonshark_patch_version: int = 0
 
 wireshark_git_url: str = "https://gitlab.com/wireshark/wireshark.git"
 wireshark_major_version: int = 4
 wireshark_minor_version: int = 4
-wireshark_patch_version: int = 1
+wireshark_patch_version: int = 2
 wireshark_suffix_version: str = ""
 
 wireshark_base_directory: str = f"""{os.getcwd()}/wireshark"""
