@@ -69,6 +69,10 @@ gint32 ls_packet_size(void)
 
 gint64 ls_packet_external_ref_count_add(packet_t *packet, gint64 ref_count)
 {
+	if (packet == NULL)
+	{
+		return 0;
+	}
 	packet->externel_ref_count += ref_count;
 	return packet->externel_ref_count;
 }

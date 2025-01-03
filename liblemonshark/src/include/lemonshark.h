@@ -19,13 +19,16 @@ extern "C"
 #include "ws_symbol_export.h"
 
 // lemonshark includes
-#include "common.h"
+#include "ls_common.h"
 #include "error_handler.h"
 #include "packet.h"
 #include "field.h"
 #include "buffer.h"
 #include "session.h"
 #include "filter.h"
+#include "epan_packet.h"
+#include "epan_field.h"
+#include "field_description.h"
 
 #ifdef __cplusplus
 }

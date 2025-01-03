@@ -38,13 +38,14 @@ SPDX-License-Identifier: GPL-2.0-only
 
 // lemonshark includes
 #include "session.h"
-#include "common.h"
+#include "ls_common.h"
 #include "packet.h"
 #include "field.h"
 #include "buffer.h"
 #include "error_handler.h"
+#include "epan_packet.h"
 
-typedef struct
+typedef struct session_t
 {
     capture_file *cap_file;
     char *read_filter;
@@ -52,6 +53,8 @@ typedef struct
     frame_data ref_frame;
     frame_data prev_dis_frame;
     frame_data prev_cap_frame;
+    epan_dissect_t current_epan_dissect;
+    epan_packet_t *current_epan_packet;
 
 } session_t;
 
@@ -343,6 +346,8 @@ gint32 ls_session_create_from_file(const char *file_path, const char *read_filte
     wtap_set_cb_new_ipv6(cap_file->provider.wth, (wtap_new_ipv6_callback_t)add_ipv6_name);
     wtap_set_cb_new_secrets(cap_file->provider.wth, secrets_wtap_callback);
 
+    reset_tap_listeners();
+
     return LS_OK;
 }
 
@@ -369,7 +374,8 @@ gint32 ls_session_get_next_packet_id(char **error_message)
 
     capture_file *cap_file = session->cap_file;
     wtap_rec *rec = &cap_file->rec;
-    epan_dissect_t* epan_dissect = epan_dissect_new(cap_file->epan, TRUE, TRUE);
+    epan_dissect_t epan_dissect;
+    epan_dissect_init(&epan_dissect, cap_file->epan, TRUE, FALSE);
     Buffer *buffer = &cap_file->buf;
 
     wtap_rec_reset(rec);
@@ -386,12 +392,14 @@ gint32 ls_session_get_next_packet_id(char **error_message)
     frame_data current_frame_data;
     frame_data_init(&current_frame_data, cap_file->count + 1, rec, file_offset, cap_file->cum_bytes);
 
+    gboolean include_columns = FALSE;
     if (cap_file->rfcode != NULL)
     {
-        epan_dissect_prime_with_dfilter(epan_dissect, cap_file->rfcode);
+        epan_dissect_prime_with_dfilter(&epan_dissect, cap_file->rfcode);
+        include_columns = dfilter_requires_columns(cap_file->rfcode);
     }
 
-    prime_epan_dissect_with_postdissector_wanted_hfids(epan_dissect);
+    prime_epan_dissect_with_postdissector_wanted_hfids(&epan_dissect);
 
     frame_data_set_before_dissect(&current_frame_data, &cap_file->elapsed_time, &cap_file->provider.ref, cap_file->provider.prev_dis);
     if (cap_file->provider.ref == &current_frame_data)
@@ -402,16 +410,17 @@ gint32 ls_session_get_next_packet_id(char **error_message)
 
     tvbuff_t *tvbuffer = frame_tvbuff_new_buffer(&cap_file->provider, &current_frame_data, buffer);
 
-    epan_dissect_run(epan_dissect, cap_file->cd_t, rec, tvbuffer, &current_frame_data, NULL);
+    column_info *cinfo = include_columns ? &cap_file->cinfo : NULL;
+    epan_dissect_run_with_taps(&epan_dissect, cap_file->cd_t, rec, tvbuffer, &current_frame_data, cinfo);
 
     gboolean passed = TRUE;
 
     if (cap_file->rfcode != NULL)
     {
-        passed = dfilter_apply_edt(cap_file->rfcode, epan_dissect);
+        passed = dfilter_apply_edt(cap_file->rfcode, &epan_dissect);
     }
 
-    epan_dissect_free(epan_dissect);
+    epan_dissect_cleanup(&epan_dissect);
 
     gint32 packet_id = 0;
     if (passed == FALSE)
@@ -430,7 +439,7 @@ gint32 ls_session_get_next_packet_id(char **error_message)
     return packet_id;
 }
 
-packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, const gint32 include_columns, const gint32 include_representations, const gint32 include_strings, const gint32 include_bytes, char **error_message)
+packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, const gint32 include_columns, const gint32 include_representations, const gint32 include_strings, const gint32 include_bytes, const gint32 *requested_field_ids, const gint32 requested_field_id_count, char **error_message)
 {
     if (session == NULL)
     {
@@ -444,7 +453,22 @@ packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, 
 
     capture_file *cap_file = session->cap_file;
     wtap_rec *rec = &cap_file->rec;
-    epan_dissect_t *epan_dissect = epan_dissect_new(cap_file->epan, TRUE, TRUE);
+    epan_dissect_t *epan_dissect = NULL;
+
+    if (requested_field_ids != NULL && requested_field_id_count > 0)
+    {
+        epan_dissect = epan_dissect_new(cap_file->epan, TRUE, FALSE);
+        for (gint32 i = 0; i < requested_field_id_count; i++)
+        {
+            gint32 requested_field_id = requested_field_ids[i];
+            epan_dissect_prime_with_hfid(epan_dissect, requested_field_id);
+        }
+    }
+    else
+    {
+        epan_dissect = epan_dissect_new(cap_file->epan, TRUE, TRUE);
+    }
+
     Buffer *buffer = &cap_file->buf;
 
     frame_data *current_frame_data = frame_data_sequence_find(cap_file->provider.frames, packet_id);
@@ -473,11 +497,6 @@ packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, 
     column_info *cinfo = include_columns ? &cap_file->cinfo : NULL;
 
     tvbuff_t *tvbuffer = frame_tvbuff_new_buffer(&cap_file->provider, current_frame_data, buffer);
-
-    if (cap_file->rfcode != NULL)
-    {
-        epan_dissect_prime_with_dfilter(epan_dissect, cap_file->rfcode);
-    }
 
     prime_epan_dissect_with_postdissector_wanted_hfids(epan_dissect);
 
@@ -580,16 +599,14 @@ void ls_field_handle_proto_node(proto_node *node, gpointer data)
     ls_field_id_set(field, current_header_field_info->id);
 
     ls_field_buffer_id_set(field, -1);
-    ls_field_buffer_offset_set(field, -1);
-    ls_field_buffer_length_set(field, 0);
+    ls_field_offset_set(field, -1);
 
     if (handle_proto_node_data->include_buffers)
     {
         tvbuff_t *buffer = current_field_info->ds_tvb;
         if (buffer != NULL)
         {
-            ls_field_buffer_offset_set(field, current_field_info->start);
-            ls_field_buffer_length_set(field, current_field_info->length);
+            ls_field_offset_set(field, current_field_info->start);
 
             gboolean buffer_found = g_ptr_array_find(handle_proto_node_data->buffers, buffer, &field->buffer_id);
             if (buffer_found == FALSE)
@@ -765,12 +782,10 @@ void ls_field_value_set_from_ftvalue(field_t *field, const field_info *current_f
     {
         if (include_bytes)
         {
-            gint32 protocol_length = (gint32)(fvalue_length2(current_field_info->value) & 0x7FFFFFFF);
-            if (protocol_length > 0)
+            gint32 length = (gint32)(current_field_info->length & 0x7FFFFFFF);
+            if (length > 0)
             {
                 tvbuff_t *buffer = fvalue_get_protocol(current_field_info->value);
-                gint32 length = (gint32)(tvb_captured_length(buffer) & 0x7FFFFFFF);
-
                 guint8 *value = g_malloc(length);
                 tvb_memcpy(buffer, value, 0, length);
 
@@ -814,12 +829,97 @@ buffer_t *ls_buffer_new_from_tvbuff(tvbuff_t *tvbuff)
     return buffer;
 }
 
+static void ls_current_epan_packet_free()
+{
+    if (session->current_epan_packet != NULL)
+    {
+        ls_epan_packet_invalidate(session->current_epan_packet);
+        ls_epan_packet_external_ref_count_add(session->current_epan_packet, -1);
+        ls_epan_packet_free(session->current_epan_packet);
+        session->current_epan_packet = NULL;
+
+        epan_dissect_cleanup(&session->current_epan_dissect);
+    }
+}
+
+epan_packet_t *ls_session_get_epan_packet(gint32 packet_id, const gint32 include_columns, const gint32 *requested_field_ids, const gint32 requested_field_id_count, char **error_message)
+{
+    if (session == NULL)
+    {
+        if (error_message != NULL)
+        {
+            *error_message = g_strdup("Invalid session");
+        }
+
+        return NULL;
+    }
+
+    capture_file *cap_file = session->cap_file;
+    wtap_rec *rec = &cap_file->rec;
+    Buffer *buffer = &cap_file->buf;
+
+    ls_current_epan_packet_free();
+
+    if (requested_field_ids != NULL && requested_field_id_count > 0)
+    {
+        epan_dissect_init(&session->current_epan_dissect, cap_file->epan, TRUE, FALSE);
+        for (gint32 i = 0; i < requested_field_id_count; i++)
+        {
+            gint32 requested_field_id = requested_field_ids[i];
+            epan_dissect_prime_with_hfid(&session->current_epan_dissect, requested_field_id);
+        }
+    }
+    else
+    {
+        epan_dissect_init(&session->current_epan_dissect, cap_file->epan, TRUE, TRUE);
+    }
+
+    frame_data *current_frame_data = frame_data_sequence_find(cap_file->provider.frames, packet_id);
+
+    if (current_frame_data == NULL)
+    {
+        if (error_message != NULL)
+        {
+            *error_message = g_strdup("Unknown frame id");
+        }
+
+        return NULL;
+    }
+
+    wtap_rec_reset(rec);
+
+    gint64 file_offset = current_frame_data->file_off;
+    int error = 0;
+    gboolean read_result = wtap_seek_read(cap_file->provider.wth, file_offset, rec, buffer, &error, error_message);
+
+    if (read_result == FALSE)
+    {
+        return NULL;
+    }
+
+    column_info *cinfo = include_columns ? &cap_file->cinfo : NULL;
+
+    tvbuff_t *tvbuffer = frame_tvbuff_new_buffer(&cap_file->provider, current_frame_data, buffer);
+
+    prime_epan_dissect_with_postdissector_wanted_hfids(&session->current_epan_dissect);
+
+    epan_dissect_run_with_taps(&session->current_epan_dissect, cap_file->cd_t, rec, tvbuffer, current_frame_data, cinfo);
+
+    session->current_epan_packet = ls_epan_packet_new();
+    ls_epan_packet_init(session->current_epan_packet, &session->current_epan_dissect);
+    ls_epan_packet_external_ref_count_add(session->current_epan_packet, 1);
+
+    return session->current_epan_packet;
+}
+
 void ls_session_close(void)
 {
     if (session == NULL)
     {
         return;
     }
+
+    ls_current_epan_packet_free();
 
     postseq_cleanup_all_protocols();
 

@@ -14,7 +14,7 @@ SPDX-License-Identifier: GPL-2.0-only
 #include "ws_symbol_export.h"
 
 // lemonshark includes
-#include "common.h"
+#include "ls_common.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -35,19 +35,15 @@ extern "C"
         gint32 id;
         gint32 type;
         gint32 buffer_id;
-        gint32 buffer_offset;
-        gint32 buffer_length;
+        gint32 offset;
+        gint32 length;
         gint32 hidden;
         gint32 generated;
         gint32 encoding;
         field_value_t value;
-        gint32 value_length;
         gboolean value_requires_free;
         GArray *children;
     } field_t;
-
-    
-    
 
     WS_DLL_PUBLIC field_t *ls_field_new(void);
 
@@ -67,17 +63,21 @@ extern "C"
 
     WS_DLL_PUBLIC gint32 ls_field_type_get(field_t *field);
 
+    WS_DLL_PUBLIC const char *ls_field_name_get(field_t *field);
+
+    WS_DLL_PUBLIC const char *ls_field_display_name_get(field_t *field);
+
+    WS_DLL_PUBLIC const char *ls_field_type_name_get(field_t *field);
+
     WS_DLL_PUBLIC gint32 ls_field_buffer_id_get(field_t *field);
 
     WS_DLL_PUBLIC void ls_field_buffer_id_set(field_t *field, const gint32 buffer_id);
 
-    WS_DLL_PUBLIC gint32 ls_field_buffer_offset_get(field_t *field);
+    WS_DLL_PUBLIC gint32 ls_field_offset_get(field_t *field);
 
-    WS_DLL_PUBLIC void ls_field_buffer_offset_set(field_t *field, const gint32 buffer_offset);
+    WS_DLL_PUBLIC void ls_field_offset_set(field_t *field, const gint32 offset);
 
-    WS_DLL_PUBLIC gint32 ls_field_buffer_length_get(field_t *field);
-
-    WS_DLL_PUBLIC void ls_field_buffer_length_set(field_t *field, const gint32 buffer_length);
+    WS_DLL_PUBLIC gint32 ls_field_length_get(field_t *field);
 
     WS_DLL_PUBLIC gint32 ls_field_hidden_get(field_t *field);
 
@@ -114,8 +114,6 @@ extern "C"
     WS_DLL_PUBLIC gint32 ls_field_value_set_bytes(field_t *field, const guint8 *value, gint32 length, const gint32 type);
 
     WS_DLL_PUBLIC gint32 ls_field_value_take_bytes(field_t *field, const guint8 *value, gint32 length, const gint32 type);
-
-    WS_DLL_PUBLIC gint32 ls_field_value_length_get(field_t *field);
 
     WS_DLL_PUBLIC gint32 ls_field_children_count(field_t *field);
 

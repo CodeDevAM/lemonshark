@@ -4,6 +4,7 @@ Copyright (c) 2024 DevAM. All Rights Reserved.
 SPDX-License-Identifier: GPL-2.0-only
 */
 
+using LemonShark.Structs;
 using System.Runtime.InteropServices;
 
 namespace LemonShark;
@@ -57,7 +58,7 @@ public class Session : IDisposable
         {
             LemonShark.FreeMemory(errorMessage);
         }
-        
+
         Session session = new();
 
         _CurrentSession = session;
@@ -109,7 +110,7 @@ public class Session : IDisposable
 
             return false;
         }
-        
+
         if (errorMessage != IntPtr.Zero)
         {
             LemonShark.FreeMemory(errorMessage);
@@ -120,19 +121,16 @@ public class Session : IDisposable
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr ls_session_get_packet(int packet_id,
-                                                        int include_buffers,
-                                                        int include_columns,
-                                                        int include_representations,
-                                                        int include_strings,
-                                                        int include_bytes,
-                                                        ref IntPtr errorMessage);
+        int include_buffers,
+        int include_columns,
+        int include_representations,
+        int include_strings,
+        int include_bytes,
+        IntPtr requested_field_ids,
+        int requested_field_id_count,
+        ref IntPtr errorMessage);
 
-    public Packet GetPacket(int packetId,
-                            bool includeBuffers,
-                            bool includeColumns,
-                            bool includeRepresentations,
-                            bool includeStrings,
-                            bool includeBytes)
+    public PacketStruct GetPacketStruct(int packetId, bool includeBuffers, bool includeColumns, bool includeRepresentations, bool includeStrings, bool includeBytes, int[] requestedFieldIds)
     {
         if (_Disposed)
         {
@@ -140,7 +138,26 @@ public class Session : IDisposable
         }
 
         IntPtr errorMessage = default;
-        IntPtr packetReference = ls_session_get_packet(packetId, includeBuffers ? 1 : 0, includeColumns ? 1 : 0, includeRepresentations ? 1 : 0, includeStrings ? 1 : 0, includeBytes ? 1 : 0, ref errorMessage);
+        IntPtr packetReference = IntPtr.Zero;
+
+        if (requestedFieldIds is null || requestedFieldIds.Length == 0)
+        {
+            packetReference = ls_session_get_packet(packetId, includeBuffers ? 1 : 0, includeColumns ? 1 : 0, includeRepresentations ? 1 : 0, includeStrings ? 1 : 0, includeBytes ? 1 : 0, IntPtr.Zero, 0, ref errorMessage);
+        }
+        else
+        {
+            GCHandle requestedFieldsHandle = GCHandle.Alloc(requestedFieldIds, GCHandleType.Pinned);
+
+            try
+            {
+                IntPtr requestedFieldsReference = requestedFieldsHandle.AddrOfPinnedObject();
+                packetReference = ls_session_get_packet(packetId, includeBuffers ? 1 : 0, includeColumns ? 1 : 0, includeRepresentations ? 1 : 0, includeStrings ? 1 : 0, includeBytes ? 1 : 0, requestedFieldsReference, requestedFieldIds?.Length ?? 0, ref errorMessage);
+            }
+            finally
+            {
+                requestedFieldsHandle.Free();
+            }
+        }
 
         if (packetReference == IntPtr.Zero)
         {
@@ -152,13 +169,79 @@ public class Session : IDisposable
             }
             throw new Exception(message);
         }
-        
+
         if (errorMessage != IntPtr.Zero)
         {
             LemonShark.FreeMemory(errorMessage);
         }
 
-        Packet packet = new(packetReference);
+        PacketStruct packet = new(packetReference);
         return packet;
+    }
+
+    public Packet GetPacket(int packetId, bool includeBuffers, bool includeColumns, bool includeRepresentations, bool includeStrings, bool includeBytes, int[] requestedFieldIds)
+    {
+        PacketStruct packetStruct = GetPacketStruct(packetId, includeBuffers, includeColumns, includeRepresentations, includeStrings, includeBytes, requestedFieldIds);
+        Packet packet = new(packetStruct);
+        return packet;
+    }
+
+    [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern IntPtr ls_session_get_epan_packet(int packet_id, int include_columns, IntPtr requested_field_ids, int requested_field_id_count, ref IntPtr errorMessage);
+
+    public EpanPacketStruct GetEpanPacketStruct(int packetId, bool includeColumns, int[] requestedFieldIds)
+    {
+        if (_Disposed)
+        {
+            throw new ObjectDisposedException(nameof(Session));
+        }
+
+        IntPtr errorMessage = default;
+        IntPtr epanPacketReference = IntPtr.Zero;
+
+        if (requestedFieldIds is null || requestedFieldIds.Length == 0)
+        {
+            epanPacketReference = ls_session_get_epan_packet(packetId, includeColumns ? 1 : 0, IntPtr.Zero, 0, ref errorMessage);
+        }
+        else
+        {
+            GCHandle requestedFieldsHandle = GCHandle.Alloc(requestedFieldIds, GCHandleType.Pinned);
+
+            try
+            {
+                IntPtr requestedFieldsReference = requestedFieldsHandle.AddrOfPinnedObject();
+                epanPacketReference = ls_session_get_epan_packet(packetId, includeColumns ? 1 : 0, requestedFieldsReference, requestedFieldIds?.Length ?? 0, ref errorMessage);
+            }
+            finally
+            {
+                requestedFieldsHandle.Free();
+            }
+        }
+
+        if (epanPacketReference == IntPtr.Zero)
+        {
+            string message = "";
+            if (errorMessage != IntPtr.Zero)
+            {
+                message = Util.NativeUtf8ToString(errorMessage);
+                LemonShark.FreeMemory(errorMessage);
+            }
+            throw new Exception(message);
+        }
+
+        if (errorMessage != IntPtr.Zero)
+        {
+            LemonShark.FreeMemory(errorMessage);
+        }
+
+        EpanPacketStruct epanPacket = new(epanPacketReference);
+        return epanPacket;
+    }
+
+    public EpanPacket GetEpanPacket(int packetId, bool includeColumns, int[] requestedFieldIds)
+    {
+        EpanPacketStruct epanPacketStruct = GetEpanPacketStruct(packetId, includeColumns, requestedFieldIds);
+        EpanPacket epanPacket = new(epanPacketStruct);
+        return epanPacket;
     }
 }

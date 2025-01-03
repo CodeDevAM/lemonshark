@@ -4,7 +4,7 @@
 
 lemonshark allows to use Wireshark as a library in an python application.
 
-See `demo.py` for a simple example.
+See `Examples` folder for some examples.
 
 ## Contribution
 

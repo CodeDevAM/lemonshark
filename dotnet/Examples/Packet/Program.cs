@@ -7,7 +7,7 @@ SPDX-License-Identifier: GPL-2.0-only
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace LemonShark.Demo;
+namespace LemonShark;
 
 internal class Program
 {
@@ -23,26 +23,21 @@ internal class Program
         {
             if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
             {
-                wiresharkDirectory = Path.GetFullPath($"{assemblyDirectory}/../../../../../build/wireshark/windows/amd64/run/RelWithDebInfo");
+                wiresharkDirectory = Path.GetFullPath($"{assemblyDirectory}/../../../../../../build/wireshark/windows/amd64/run/RelWithDebInfo");
             }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
             {
-                wiresharkDirectory = Path.GetFullPath($"{assemblyDirectory}/../../../../../build/wireshark/linux/x86_64/run"); ;
+                wiresharkDirectory = Path.GetFullPath($"{assemblyDirectory}/../../../../../../build/wireshark/linux/x86_64/run");
             }
         }
 
         LemonShark.Init([wiresharkDirectory]);
 
+        // Read a file with a read filter
         using Session session = Session.CreateFromFile(traceFilePath, "frame.len < 150");
-
-        // Test filter
-        bool isValidFilter = Filter.IsValid("frame.len < 150", out string errorMessage);
-        isValidFilter = Filter.IsValid("frame.len ! 150", out errorMessage);
-
-        List<Packet> packets = [];
 
         try
         {
@@ -53,23 +48,19 @@ internal class Program
                     continue;
                 }
 
-                Packet packet = session.GetPacket(packetId, true, true, true, true, true);
+                Packet packet = session.GetPacket(packetId, true, true, true, true, true, null);
                 PrintPacket(packet);
-
-                packets.Add(packet);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
-
-        GC.Collect();
     }
 
     private static void PrintPacket(Packet packet)
     {
-        Console.WriteLine($"Id: {packet.Id}: Timestamp: {packet.Timestamp}, Length: {packet.Length}, Buffers: {packet.BuffersCount}, Info: {packet.InfoColumn}");
+        Console.WriteLine($"Id: {packet.Id}, Timestamp: {packet.Timestamp}, Length: {packet.Length}, Buffers: {packet.BuffersCount}, Info: {packet.InfoColumn}");
 
         for (int i = 0; i < packet.BuffersCount; i++)
         {
@@ -92,8 +83,10 @@ internal class Program
         for (int i = 0; i < childrenCount; i++)
         {
             Field child = packet.RootField.GetChild(i);
-            PrintFields(child, 0);
+            PrintFields(child, 1);
         }
+
+        Console.Write("\n");
     }
 
     private static void PrintFields(Field field, int indentationCount)
@@ -131,29 +124,29 @@ internal class Program
 
         if (field.BufferId >= 0)
         {
-            Console.Write($" {{Buffer {field.BufferId}:{field.BufferOffset}:{field.BufferLength}}}");
+            Console.Write($" {{Buffer {field.BufferId}:{field.Offset}:{field.Length}}}");
         }
 
         Console.Write(": ");
 
         if (field.IsInt64)
         {
-            long value = field.GetInt64Value();
+            long value = field.Int64Value;
             Console.Write($"{value} (0x{value:X})");
         }
         else if (field.IsUInt64)
         {
-            ulong value = field.GetUInt64Value();
+            ulong value = field.UInt64Value;
             Console.Write($"{value} (0x{value:X})");
         }
         else if (field.IsDouble)
         {
-            double value = field.GetDoubleValue();
+            double value = field.DoubleValue;
             Console.Write($"{value}");
         }
         else if (field.IsString)
         {
-            string value = field.GetStringValue();
+            string value = field.StringValue;
             if (value is not null)
             {
                 Console.Write($"{value}");
@@ -161,12 +154,15 @@ internal class Program
         }
         else if (field.IsBytes)
         {
-            byte[] value = field.GetBytesValue();
-            if (value is not null)
+            if (field.Type != FieldType.Protocol)
             {
-                for (int i = 0; i < value.Length; i++)
+                byte[] value = field.BytesValue;
+                if (value is not null)
                 {
-                    Console.Write($"{value[i]:X2} ");
+                    for (int i = 0; i < value.Length; i++)
+                    {
+                        Console.Write($"{value[i]:X2} ");
+                    }
                 }
             }
         }

@@ -4,7 +4,6 @@ Copyright (c) 2024 DevAM. All Rights Reserved.
 SPDX-License-Identifier: GPL-2.0-only
 */
 
-#include "glib.h"
 #include "lemonshark.h"
 #include "wsutil/array.h"
 
@@ -60,9 +59,9 @@ static void print_fields(field_t *field, gint32 indentation_count)
     gint32 buffer_id = ls_field_buffer_id_get(field);
     if (buffer_id >= 0)
     {
-        gint32 buffer_offset = ls_field_buffer_offset_get(field);
-        gint32 buffer_length = ls_field_buffer_length_get(field);
-        g_print(" {Buffer %i:%i:%i}", buffer_id, buffer_offset, buffer_length);
+        gint32 offset = ls_field_offset_get(field);
+        gint32 length = ls_field_length_get(field);
+        g_print(" {Buffer %i:%i:%i}", buffer_id, offset, length);
     }
 
     g_print(": ");
@@ -93,14 +92,17 @@ static void print_fields(field_t *field, gint32 indentation_count)
     }
     else if (ls_field_type_is_bytes(field_type))
     {
-        gint32 length = ls_field_value_length_get(field);
-        const guint8 *value = ls_field_value_get_bytes(field);
-
-        if (value != NULL)
+        if (field_type != ls_field_type_protocol())
         {
-            for (gint32 i = 0; i < length; i++)
+            gint32 length = ls_field_length_get(field);
+            const guint8 *value = ls_field_value_get_bytes(field);
+
+            if (value != NULL)
             {
-                g_print("%02X ", value[i]);
+                for (gint32 i = 0; i < length; i++)
+                {
+                    g_print("%02X ", value[i]);
+                }
             }
         }
     }
@@ -119,7 +121,7 @@ static void print_fields(field_t *field, gint32 indentation_count)
     }
 }
 
-void print_packet(packet_t *packet)
+static void print_packet(packet_t *packet)
 {
     gint32 packet_id = ls_packet_id_get(packet);
     gint32 length = ls_packet_length_get(packet);
@@ -146,24 +148,27 @@ void print_packet(packet_t *packet)
         }
         g_print("\n");
     }
-    gint32 child_count = ls_field_children_count(packet->root_field);
+
+    field_t *root_field = ls_packet_root_field_get(packet);
+
+    gint32 child_count = ls_field_children_count(root_field);
     for (gint32 i = 0; i < child_count; i++)
     {
-        field_t *child = ls_field_children_get(packet->root_field, i);
-        print_fields(child, 0);
+        field_t *child = ls_field_children_get(root_field, i);
+        print_fields(child, 1);
     }
+
+    g_print("\n");
 }
 
 int main(void)
 {
     void *error_handler = ls_error_handler_add(handle_error);
 
-    g_print("1. Session\n");
-
     const char *trace_file_path = g_getenv("LS_EXAMPLE_FILE");
 
-    char* error_message = NULL;
-    gint32 init_result = ls_session_create_from_file(trace_file_path, "frame.len < 150", &error_message);
+    char *error_message = NULL;
+    gint32 init_result = ls_session_create_from_file(trace_file_path, "", &error_message);
 
     if (init_result == LS_ERROR)
     {
@@ -171,14 +176,6 @@ int main(void)
         g_free(error_message);
         return -1;
     }
-
-    // Test filter
-    error_message = NULL;
-    gint32 is_valid_filter = ls_filter_is_valid("frame.len < 150", &error_message);
-    error_message = NULL;
-    is_valid_filter = ls_filter_is_valid("frame.len ! 150", &error_message);
-
-    GPtrArray* packets = g_ptr_array_new();
 
     gint32 packet_id = 0;
     while (TRUE)
@@ -196,7 +193,7 @@ int main(void)
         }
 
         error_message = NULL;
-        packet_t* packet = ls_session_get_packet(packet_id, TRUE, TRUE, TRUE, TRUE, TRUE, &error_message);
+        packet_t *packet = ls_session_get_packet(packet_id, TRUE, TRUE, TRUE, TRUE, TRUE, NULL, 0, &error_message);
 
         if (packet == NULL)
         {
@@ -211,16 +208,8 @@ int main(void)
 
         print_packet(packet);
 
-        g_ptr_array_add(packets, packet);
-    }
-
-    for (guint i = 0; i < g_ptr_array_len(packets); i++)
-    {
-        packet_t* packet = g_ptr_array_index(packets, i);
         ls_packet_free(packet);
     }
-
-    g_ptr_array_free(packets, TRUE);
 
     ls_session_close();
 

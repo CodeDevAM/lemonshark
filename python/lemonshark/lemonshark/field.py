@@ -44,23 +44,29 @@ class Field:
             liblemonshark.ls_field_type_get.argtypes = [c_void_p]
             liblemonshark.ls_field_type_get.restype = c_int32
 
+            liblemonshark.ls_field_name_get.argtypes = [c_void_p]
+            liblemonshark.ls_field_name_get.restype = c_char_p
+
+            liblemonshark.ls_field_display_name_get.argtypes = [c_void_p]
+            liblemonshark.ls_field_display_name_get.restype = c_char_p
+
+            liblemonshark.ls_field_type_name_get.argtypes = [c_void_p]
+            liblemonshark.ls_field_type_name_get.restype = c_char_p
+
             liblemonshark.ls_field_buffer_id_get.argtypes = [c_void_p]
             liblemonshark.ls_field_buffer_id_get.restype = c_int32
 
             liblemonshark.ls_field_buffer_id_set.argtypes = [c_void_p, c_int32]
             liblemonshark.ls_field_buffer_id_set.restype = None
 
-            liblemonshark.ls_field_buffer_offset_get.argtypes = [c_void_p]
-            liblemonshark.ls_field_buffer_offset_get.restype = c_int32
+            liblemonshark.ls_field_offset_get.argtypes = [c_void_p]
+            liblemonshark.ls_field_offset_get.restype = c_int32
 
-            liblemonshark.ls_field_buffer_offset_set.argtypes = [c_void_p, c_int32]
-            liblemonshark.ls_field_buffer_offset_set.restype = None
+            liblemonshark.ls_field_offset_set.argtypes = [c_void_p, c_int32]
+            liblemonshark.ls_field_offset_set.restype = None
 
-            liblemonshark.ls_field_buffer_length_get.argtypes = [c_void_p]
-            liblemonshark.ls_field_buffer_length_get.restype = c_int32
-
-            liblemonshark.ls_field_buffer_length_set.argtypes = [c_void_p, c_int32]
-            liblemonshark.ls_field_buffer_length_set.restype = None
+            liblemonshark.ls_field_length_get.argtypes = [c_void_p]
+            liblemonshark.ls_field_length_get.restype = c_int32
 
             liblemonshark.ls_field_hidden_get.argtypes = [c_void_p]
             liblemonshark.ls_field_hidden_get.restype = c_int32
@@ -109,9 +115,6 @@ class Field:
 
             liblemonshark.ls_field_value_set_bytes.argtypes = [c_void_p, c_char_p, c_int32, c_int32]
             liblemonshark.ls_field_value_set_bytes.restype = c_int32
-
-            liblemonshark.ls_field_value_length_get.argtypes = [c_void_p]
-            liblemonshark.ls_field_value_length_get.restype = c_int32
 
             liblemonshark.ls_field_children_count.argtypes = [c_void_p]
             liblemonshark.ls_field_children_count.restype = c_int32
@@ -196,9 +199,38 @@ class Field:
         type: int = liblemonshark.ls_field_type_get(self.c_field)
         return type
 
-    def set_type(self, type: int) -> None:
+    def get_name(self) -> str:
         liblemonshark: CDLL = Field.get_liblemonshark()
-        liblemonshark.ls_field_type_set(self.c_field, type)
+        c_name: bytes = liblemonshark.ls_field_name_get(self.c_field)
+
+        if c_name is None:
+            return None
+
+        name: str = c_name.decode("utf-8")
+
+        return name
+    
+    def get_display_name(self) -> str:
+        liblemonshark: CDLL = Field.get_liblemonshark()
+        c_display_name: bytes = liblemonshark.ls_field_display_name_get(self.c_field)
+
+        if c_display_name is None:
+            return None
+
+        display_name: str = c_display_name.decode("utf-8")
+
+        return display_name
+    
+    def get_type_name(self) -> str:
+        liblemonshark: CDLL = Field.get_liblemonshark()
+        c_type_name: bytes = liblemonshark.ls_field_type_name_get(self.c_field)
+
+        if c_type_name is None:
+            return None
+
+        type_name: str = c_type_name.decode("utf-8")
+
+        return type_name
 
     def get_buffer_id(self) -> int:
         liblemonshark: CDLL = Field.get_liblemonshark()
@@ -209,23 +241,19 @@ class Field:
         liblemonshark: CDLL = Field.get_liblemonshark()
         liblemonshark.ls_field_buffer_id_set(self.c_field, buffer_id)
 
-    def get_buffer_offset(self) -> int:
+    def get_offset(self) -> int:
         liblemonshark: CDLL = Field.get_liblemonshark()
-        buffer_offset: int = liblemonshark.ls_field_buffer_offset_get(self.c_field)
-        return buffer_offset
+        offset: int = liblemonshark.ls_field_offset_get(self.c_field)
+        return offset
 
-    def set_buffer_offset(self, buffer_offset: int) -> None:
+    def set_offset(self, offset: int) -> None:
         liblemonshark: CDLL = Field.get_liblemonshark()
-        liblemonshark.ls_field_buffer_offset_set(self.c_field, buffer_offset)
+        liblemonshark.ls_field_offset_set(self.c_field, offset)
 
-    def get_buffer_length(self) -> int:
+    def get_length(self) -> int:
         liblemonshark: CDLL = Field.get_liblemonshark()
-        buffer_length: int = liblemonshark.ls_field_buffer_length_get(self.c_field)
-        return buffer_length
-
-    def set_buffer_length(self, buffer_length: int) -> None:
-        liblemonshark: CDLL = Field.get_liblemonshark()
-        liblemonshark.ls_field_buffer_length_set(self.c_field, buffer_length)
+        length: int = liblemonshark.ls_field_length_get(self.c_field)
+        return length
 
     def get_hidden(self) -> bool:
         liblemonshark: CDLL = Field.get_liblemonshark()
@@ -336,7 +364,7 @@ class Field:
         if c_value is None or c_value == 0:
             return None
 
-        length: int = self.get_value_length()
+        length: int = self.get_length()
 
         value: bytes = string_at(c_void_p(c_value), length)
 
@@ -351,11 +379,6 @@ class Field:
 
         if set_result == LemonShark.error():
             raise Exception("Invalid type")
-
-    def get_value_length(self) -> int:
-        liblemonshark: CDLL = Field.get_liblemonshark()
-        value_length: int = liblemonshark.ls_field_value_length_get(self.c_field)
-        return value_length
 
     def is_int64(self) -> bool:
         field_type: int = self.get_type()
@@ -437,12 +460,12 @@ class Field:
         liblemonshark.ls_field_children_remove(self.c_field, index)
 
     def get_children(self) -> List["Field"]:
-        result: List["Field"] = []
+        children: List["Field"] = []
         children_count: int = self.children_count()
         for i in range(children_count):
             child: "Field" = self.get_child(i)
-            result.append(child)
-        return result
+            children.append(child)
+        return children
 
     def get_name_from_id(field_id: int) -> str:
         if field_id <= 0:
@@ -457,11 +480,6 @@ class Field:
         name: str = c_name.decode("utf-8")
         return name
 
-    def get_name(self) -> str:
-        field_id: int = self.get_field_id()
-        name: str = Field.get_name_from_id(field_id)
-        return name
-
     def get_display_name_from_id(field_id: int) -> str:
         if field_id <= 0:
             return None
@@ -474,16 +492,6 @@ class Field:
 
         display_name: str = c_display_name.decode("utf-8")
         return display_name
-
-    def get_display_name(self) -> str:
-        field_id: int = self.get_field_id()
-        display_name: str = Field.get_display_name_from_id(field_id)
-        return display_name
-
-    def get_type_name(self) -> str:
-        field_type: int = self.get_type()
-        type_name: str = FieldType.get_name(field_type)
-        return type_name
 
 
 class FieldType:

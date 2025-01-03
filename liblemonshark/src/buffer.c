@@ -47,6 +47,10 @@ gint32 ls_buffer_size(void)
 
 gint64 ls_buffer_external_ref_count_add(buffer_t *buffer, gint64 ref_count)
 {
+    if (buffer == NULL)
+    {
+        return 0;
+    }
     buffer->externel_ref_count += ref_count;
     return buffer->externel_ref_count;
 }

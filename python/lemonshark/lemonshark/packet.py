@@ -206,24 +206,24 @@ class Packet:
 
     def get_root_field(self) -> Field:
         liblemonshark: CDLL = Packet.get_liblemonshark()
-        c_field: int = liblemonshark.ls_packet_root_field_get(self.c_packet)
-        if c_field is None or c_field == 0:
+        c_root_field: int = liblemonshark.ls_packet_root_field_get(self.c_packet)
+        if c_root_field is None or c_root_field == 0:
             return None
-        field: Field = Field(c_void_p(c_field))
-        return field
+        root_field: Field = Field(c_void_p(c_root_field))
+        return root_field
 
-    def set_root_field(self, field: Field) -> None:
+    def set_root_field(self, root_field: Field) -> None:
         liblemonshark: CDLL = Packet.get_liblemonshark()
         if (
-            field is None
-            or field.c_field is None
-            or field.c_field.value is None
-            or field.c_field.value == 0
+            root_field is None
+            or root_field.c_field is None
+            or root_field.c_field.value is None
+            or root_field.c_field.value == 0
         ):
-            raise Exception("field must not be null.")
+            raise Exception("root_field must not be null.")
 
         liblemonshark: CDLL = Packet.get_liblemonshark()
-        liblemonshark.ls_packet_root_field_set(self.c_packet, field.c_field)
+        liblemonshark.ls_packet_root_field_set(self.c_packet, root_field.c_field)
 
     def get_protocol_column(self) -> str:
         liblemonshark: CDLL = Packet.get_liblemonshark()

@@ -65,6 +65,10 @@ gint32 ls_field_size(void)
 
 gint64 ls_field_external_ref_count_add(field_t *field, gint64 ref_count)
 {
+    if (field == NULL)
+    {
+        return 0;
+    }
     field->externel_ref_count += ref_count;
     return field->externel_ref_count;
 }
@@ -99,6 +103,21 @@ gint32 ls_field_type_get(field_t *field)
     return field->type;
 }
 
+const char *ls_field_name_get(field_t *field)
+{
+    return ls_field_get_name(field->id);
+}
+
+const char *ls_field_display_name_get(field_t *field)
+{
+    return ls_field_get_display_name(field->id);
+}
+
+const char *ls_field_type_name_get(field_t *field)
+{
+    return ls_field_type_get_name(field->type);
+}
+
 gint32 ls_field_buffer_id_get(field_t *field)
 {
     return field->buffer_id;
@@ -109,24 +128,19 @@ void ls_field_buffer_id_set(field_t *field, const gint32 buffer_id)
     field->buffer_id = buffer_id >= 0 ? buffer_id : -1;
 }
 
-gint32 ls_field_buffer_offset_get(field_t *field)
+gint32 ls_field_offset_get(field_t *field)
 {
-    return field->buffer_offset;
+    return field->offset;
 }
 
-void ls_field_buffer_offset_set(field_t *field, const gint32 buffer_offset)
+void ls_field_offset_set(field_t *field, const gint32 offset)
 {
-    field->buffer_offset = buffer_offset >= 0 ? buffer_offset : -1;
+    field->offset = offset >= 0 ? offset : -1;
 }
 
-gint32 ls_field_buffer_length_get(field_t *field)
+gint32 ls_field_length_get(field_t *field)
 {
-    return field->buffer_length;
-}
-
-void ls_field_buffer_length_set(field_t *field, const gint32 buffer_length)
-{
-    field->buffer_length = buffer_length;
+    return field->length;
 }
 
 gint32 ls_field_hidden_get(field_t *field)
@@ -180,7 +194,7 @@ gint32 ls_field_value_set_int64(field_t *field, const gint64 value, const gint32
     }
 
     field->value.value = (guint64)value;
-    field->value_length = -1;
+    field->length = 0;
     field->value_requires_free = FALSE;
     field->type = type;
 
@@ -208,7 +222,7 @@ gint32 ls_field_value_set_uint64(field_t *field, const guint64 value, const gint
     }
 
     field->value.value = (guint64)value;
-    field->value_length = -1;
+    field->length = 0;
     field->value_requires_free = FALSE;
     field->type = type;
 
@@ -237,7 +251,7 @@ gint32 ls_field_value_set_double(field_t *field, const double value, const gint3
     }
 
     field->value.double_value = value;
-    field->value_length = -1;
+    field->length = 0;
     field->value_requires_free = FALSE;
     field->type = type;
 
@@ -265,7 +279,7 @@ gint32 ls_field_value_set_string(field_t *field, const char *value, const gint32
     }
 
     field->value.pointer = value != NULL ? (void*)g_strdup(value) : 0;
-    field->value_length = -1;
+    field->length = value != NULL ? strlen(value) : 0;
     field->value_requires_free = TRUE;
     field->type = type;
 
@@ -288,7 +302,7 @@ gint32 ls_field_value_take_string(field_t *field, const char *value, const gint3
     }
 
     field->value.pointer = (void*)value;
-    field->value_length = -1;
+    field->length = value != NULL ? strlen(value) : 0;
     field->value_requires_free = TRUE;
     field->type = type;
 
@@ -316,7 +330,7 @@ gint32 ls_field_value_set_bytes(field_t *field, const guint8 *value, gint32 leng
     }
 
     field->value.pointer = value != NULL ? (void*)g_memdup2(value, length) : 0;
-    field->value_length = length;
+    field->length = length;
     field->value_requires_free = TRUE;
     field->type = type;
 
@@ -339,16 +353,11 @@ gint32 ls_field_value_take_bytes(field_t *field, const guint8 *value, gint32 len
     }
 
     field->value.pointer = (void*)value;
-    field->value_length = length;
+    field->length = length;
     field->value_requires_free = TRUE;
     field->type = type;
 
     return LS_OK;
-}
-
-gint32 ls_field_value_length_get(field_t *field)
-{
-    return field->value_length;
 }
 
 gint32 ls_field_children_count(field_t *field)

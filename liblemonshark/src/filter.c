@@ -11,7 +11,7 @@ SPDX-License-Identifier: GPL-2.0-only
 
 // lemonshark includes
 #include "filter.h"
-#include "common.h"
+#include "ls_common.h"
 
 gint32 ls_filter_is_valid(const char* filter, char** error_message)
 {

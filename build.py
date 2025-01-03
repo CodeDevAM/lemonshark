@@ -26,12 +26,16 @@ lemonshark_src_directory: str = f"""{os.getcwd()}/liblemonshark/src"""
 lemonshark_build_directory: str = f"""{base_build_directory}/liblemonshark/{system}/{architecture}"""
 lemonshark_binary_base_directory: str = f"""{lemonshark_build_directory}/bin"""
 
-lemonshark_demo_src_directory: str = f"""{os.getcwd()}/liblemonshark/lemonshark_demo"""
-lemonshark_demo_build_directory: str = f"""{base_build_directory}/lemonshark_demo/{system}/{architecture}"""
-lemonshark_demo_binary_base_directory: str = f"""{lemonshark_demo_build_directory}/bin"""
+lemonshark_examples_directory: str = f"""{os.getcwd()}/liblemonshark/examples"""
+lemonshark_examples_build_directory: str = f"""{base_build_directory}/examples/{system}/{architecture}"""
+lemonshark_examples_binary_base_directory: str = f"""{lemonshark_examples_build_directory}/bin"""
+
+lemonshark_host_src_directory: str = f"""{os.getcwd()}/liblemonshark/lemonshark_host"""
+lemonshark_host_build_directory: str = f"""{base_build_directory}/lemonshark_host/{system}/{architecture}"""
+lemonshark_host_binary_base_directory: str = f"""{lemonshark_host_build_directory}/bin"""
 
 lemonshark_major_version: int = 0
-lemonshark_minor_version: int = 3
+lemonshark_minor_version: int = 4
 lemonshark_patch_version: int = 0
 
 wireshark_git_url: str = "https://gitlab.com/wireshark/wireshark.git"
@@ -214,9 +218,13 @@ def integrate_lemonshark():
             set(LEMONSHARK_BUILD_DIRECTORY {lemonshark_build_directory})
             set(LEMONSHARK_BINARY_BASE_DIRECTORY {lemonshark_binary_base_directory})
 
-            set(LEMONSHARK_DEMO_SRC_DIRECTORY {lemonshark_demo_src_directory})
-            set(LEMONSHARK_DEMO_BUILD_DIRECTORY {lemonshark_demo_build_directory})
-            set(LEMONSHARK_DEMO_BINARY_BASE_DIRECTORY {lemonshark_demo_binary_base_directory})
+            set(LEMONSHARK_EXAMPLES_DIRECTORY {lemonshark_examples_directory})
+            set(LEMONSHARK_EXAMPLES_BUILD_DIRECTORY {lemonshark_examples_build_directory})
+            set(LEMONSHARK_EXAMPLES_BINARY_BASE_DIRECTORY {lemonshark_examples_binary_base_directory})
+
+            set(LEMONSHARK_HOST_SRC_DIRECTORY {lemonshark_host_src_directory})
+            set(LEMONSHARK_HOST_BUILD_DIRECTORY {lemonshark_host_build_directory})
+            set(LEMONSHARK_HOST_BINARY_BASE_DIRECTORY {lemonshark_host_binary_base_directory})
 
             set(WIRESHARK_MAJOR_VERSION {wireshark_major_version})
             set(WIRESHARK_MINOR_VERSION {wireshark_minor_version})
@@ -277,8 +285,20 @@ def integrate_lemonshark():
             add_dependencies(liblemonshark wsutil)
             add_dependencies(liblemonshark wiretap)
 
-            add_subdirectory(${LEMONSHARK_DEMO_SRC_DIRECTORY} ${LEMONSHARK_DEMO_BUILD_DIRECTORY})
-            add_dependencies(lemonshark_demo liblemonshark)
+            add_subdirectory(${LEMONSHARK_EXAMPLES_DIRECTORY}/epan_packet ${LEMONSHARK_EXAMPLES_BUILD_DIRECTORY}/epan_packet)
+            add_dependencies(epan_packet_demo liblemonshark)
+
+            add_subdirectory(${LEMONSHARK_EXAMPLES_DIRECTORY}/field_description ${LEMONSHARK_EXAMPLES_BUILD_DIRECTORY}/field_description)
+            add_dependencies(field_description_demo liblemonshark)
+
+            add_subdirectory(${LEMONSHARK_EXAMPLES_DIRECTORY}/filter ${LEMONSHARK_EXAMPLES_BUILD_DIRECTORY}/filter)
+            add_dependencies(filter_demo liblemonshark)
+
+            add_subdirectory(${LEMONSHARK_EXAMPLES_DIRECTORY}/packet ${LEMONSHARK_EXAMPLES_BUILD_DIRECTORY}/packet)
+            add_dependencies(packet_demo liblemonshark)
+
+            add_subdirectory(${LEMONSHARK_HOST_SRC_DIRECTORY} ${LEMONSHARK_HOST_BUILD_DIRECTORY})
+            add_dependencies(lemonshark_host liblemonshark)
 
             # END LEMONSHARK
             """.replace(

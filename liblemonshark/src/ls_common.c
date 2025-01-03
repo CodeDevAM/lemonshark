@@ -10,7 +10,7 @@ SPDX-License-Identifier: GPL-2.0-only
 #include "epan/epan.h"
 
 // lemonshark includes
-#include "common.h"
+#include "ls_common.h"
 
 gint32 ls_version_get_major(void)
 {

@@ -4,7 +4,7 @@
 
 LemonShark allows to use Wireshark as a library in an C#/.NET application.
 
-See `Lemonshark.Demo` for a simple example.
+See `Examples` folder for some examples.
 
 ## Contribution
 

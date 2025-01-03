@@ -11,3 +11,6 @@ from .field import Field, FieldType
 from .encoding import Encoding
 from .buffer import Buffer
 from .filter import Filter
+from .epan_packet import EpanPacket
+from .epan_field import EpanField
+from .field_description import FieldDescription

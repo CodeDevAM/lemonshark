@@ -12,11 +12,11 @@ from typing import *
 system: str = platform.system().lower()
 architecture: str = platform.machine().lower()
 
-lemonshark_directory: str = os.path.dirname(os.path.realpath(__file__)) + f"/../lemonshark"
+lemonshark_directory: str = os.path.dirname(os.path.realpath(__file__)) + f"/../../lemonshark"
 lemonshark_directory = os.path.realpath(lemonshark_directory)
 sys.path.append(lemonshark_directory)
 
-from lemonshark import LemonShark, Session, Packet, Field, Buffer, Filter
+from lemonshark import LemonShark, Session, Packet, Field, Buffer, FieldType
 
 
 def print_fields(field: Field, indentation_count: int) -> None:
@@ -50,10 +50,10 @@ def print_fields(field: Field, indentation_count: int) -> None:
 
     buffer_id: int = field.get_buffer_id()
     if buffer_id >= 0:
-        buffer_offset: int = field.get_buffer_offset()
-        buffer_length: int = field.get_buffer_length()
+        offset: int = field.get_offset()
+        length: int = field.get_length()
 
-        print(f""" {{Buffer {buffer_id}:{buffer_offset}:{buffer_length}}}""", end="")
+        print(f""" {{Buffer {buffer_id}:{offset}:{length}}}""", end="")
 
     print(": ", end="")
 
@@ -71,10 +71,11 @@ def print_fields(field: Field, indentation_count: int) -> None:
         if value is not None:
             print(value, end="")
     elif field.is_bytes():
-        value: bytes = field.get_bytes_value()
-        if value is not None:
-            for j in range(len(value)):
-                print(f"""{value[j]:02X} """, end="")
+        if field.get_type() != FieldType.protocol():
+            value: bytes = field.get_bytes_value()
+            if value is not None:
+                for j in range(len(value)):
+                    print(f"""{value[j]:02X} """, end="")
     else:
         print("unknown type", end="")
 
@@ -112,27 +113,24 @@ def print_packet(packet: Packet) -> None:
 
     for i in range(children_count):
         child: Field = root_field.get_child(i)
-        print_fields(child, 0)
+        print_fields(child, 1)
+
+    print("")
 
 
 def main():
     wireshark_directory: str = None
     if system == "windows":
         if architecture == "amd64":
-            wireshark_directory = os.path.dirname(os.path.realpath(__file__)) + f"/../../build/wireshark/windows/amd64/run/RelWithDebInfo"
+            wireshark_directory = os.path.dirname(os.path.realpath(__file__)) + f"/../../../build/wireshark/windows/amd64/run/RelWithDebInfo"
             wireshark_directory = os.path.realpath(wireshark_directory)
 
     LemonShark.init([wireshark_directory])
 
     trace_file_path: str = os.environ["LS_EXAMPLE_FILE"]
 
-    session: Session = Session.create_from_file(trace_file_path, "frame.len < 150")
+    session: Session = Session.create_from_file(trace_file_path, "")
 
-    # Test filter
-    (is_valid, error_message) = Filter.is_valid("frame.len < 150")
-    (is_valid, error_message) = Filter.is_valid("frame.len ! 150")
-
-    packets: List[Packet] = []
     try:
         packet_id: int = 0
 
@@ -143,10 +141,9 @@ def main():
             if packet_id == 0:
                 continue
 
-            packet: Packet = session.get_packet(packet_id, True, True, True, True, True)
+            packet: Packet = session.get_packet(packet_id, True, True, True, True, True, None)
 
             print_packet(packet)
-            packets.append(packet)
 
     except Exception as ex:
         print(ex)

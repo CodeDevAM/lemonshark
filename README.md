@@ -6,7 +6,7 @@ lemonshark allows to use Wireshark as a library.
 
 `liblemonshark` offers an FFI friendly C-API and bindings for C# (.NET) and Python.
 
-See `lemonshark_demo` for a simple example in `C`.
+See `Examples` folder for some examples.
 
 ## Build
 
