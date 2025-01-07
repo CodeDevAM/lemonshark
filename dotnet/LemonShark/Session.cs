@@ -130,7 +130,7 @@ public class Session : IDisposable
         int requested_field_id_count,
         ref IntPtr errorMessage);
 
-    public PacketStruct GetPacketStruct(int packetId, bool includeBuffers, bool includeColumns, bool includeRepresentations, bool includeStrings, bool includeBytes, int[] requestedFieldIds)
+    public PacketStruct GetPacketStruct(int packetId, bool includeBuffers, bool includeColumns, bool includeRepresentations, bool includeStrings, bool includeBytes, int[] requestedFieldIds, int requestedFieldIdCount)
     {
         if (_Disposed)
         {
@@ -146,12 +146,17 @@ public class Session : IDisposable
         }
         else
         {
+            if (requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(requestedFieldIdCount), requestedFieldIdCount, "requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length");
+            }
+
             GCHandle requestedFieldsHandle = GCHandle.Alloc(requestedFieldIds, GCHandleType.Pinned);
 
             try
             {
                 IntPtr requestedFieldsReference = requestedFieldsHandle.AddrOfPinnedObject();
-                packetReference = ls_session_get_packet(packetId, includeBuffers ? 1 : 0, includeColumns ? 1 : 0, includeRepresentations ? 1 : 0, includeStrings ? 1 : 0, includeBytes ? 1 : 0, requestedFieldsReference, requestedFieldIds?.Length ?? 0, ref errorMessage);
+                packetReference = ls_session_get_packet(packetId, includeBuffers ? 1 : 0, includeColumns ? 1 : 0, includeRepresentations ? 1 : 0, includeStrings ? 1 : 0, includeBytes ? 1 : 0, requestedFieldsReference, requestedFieldIdCount, ref errorMessage);
             }
             finally
             {
@@ -179,9 +184,9 @@ public class Session : IDisposable
         return packet;
     }
 
-    public Packet GetPacket(int packetId, bool includeBuffers, bool includeColumns, bool includeRepresentations, bool includeStrings, bool includeBytes, int[] requestedFieldIds)
+    public Packet GetPacket(int packetId, bool includeBuffers, bool includeColumns, bool includeRepresentations, bool includeStrings, bool includeBytes, int[] requestedFieldIds, int requestedFieldIdCount)
     {
-        PacketStruct packetStruct = GetPacketStruct(packetId, includeBuffers, includeColumns, includeRepresentations, includeStrings, includeBytes, requestedFieldIds);
+        PacketStruct packetStruct = GetPacketStruct(packetId, includeBuffers, includeColumns, includeRepresentations, includeStrings, includeBytes, requestedFieldIds, requestedFieldIdCount);
         Packet packet = new(packetStruct);
         return packet;
     }
@@ -189,7 +194,7 @@ public class Session : IDisposable
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr ls_session_get_epan_packet(int packet_id, int include_columns, IntPtr requested_field_ids, int requested_field_id_count, ref IntPtr errorMessage);
 
-    public EpanPacketStruct GetEpanPacketStruct(int packetId, bool includeColumns, int[] requestedFieldIds)
+    public EpanPacketStruct GetEpanPacketStruct(int packetId, bool includeColumns, int[] requestedFieldIds, int requestedFieldIdCount)
     {
         if (_Disposed)
         {
@@ -199,18 +204,23 @@ public class Session : IDisposable
         IntPtr errorMessage = default;
         IntPtr epanPacketReference = IntPtr.Zero;
 
-        if (requestedFieldIds is null || requestedFieldIds.Length == 0)
+        if (requestedFieldIds is null || requestedFieldIds.Length == 0 || requestedFieldIdCount == 0)
         {
             epanPacketReference = ls_session_get_epan_packet(packetId, includeColumns ? 1 : 0, IntPtr.Zero, 0, ref errorMessage);
         }
         else
         {
+            if (requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(requestedFieldIdCount), requestedFieldIdCount, "requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length");
+            }
+
             GCHandle requestedFieldsHandle = GCHandle.Alloc(requestedFieldIds, GCHandleType.Pinned);
 
             try
             {
                 IntPtr requestedFieldsReference = requestedFieldsHandle.AddrOfPinnedObject();
-                epanPacketReference = ls_session_get_epan_packet(packetId, includeColumns ? 1 : 0, requestedFieldsReference, requestedFieldIds?.Length ?? 0, ref errorMessage);
+                epanPacketReference = ls_session_get_epan_packet(packetId, includeColumns ? 1 : 0, requestedFieldsReference, requestedFieldIdCount, ref errorMessage);
             }
             finally
             {
@@ -238,9 +248,9 @@ public class Session : IDisposable
         return epanPacket;
     }
 
-    public EpanPacket GetEpanPacket(int packetId, bool includeColumns, int[] requestedFieldIds)
+    public EpanPacket GetEpanPacket(int packetId, bool includeColumns, int[] requestedFieldIds, int requestedFieldIdCount)
     {
-        EpanPacketStruct epanPacketStruct = GetEpanPacketStruct(packetId, includeColumns, requestedFieldIds);
+        EpanPacketStruct epanPacketStruct = GetEpanPacketStruct(packetId, includeColumns, requestedFieldIds, requestedFieldIdCount);
         EpanPacket epanPacket = new(epanPacketStruct);
         return epanPacket;
     }
