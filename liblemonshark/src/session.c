@@ -462,6 +462,11 @@ packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, 
         {
             gint32 requested_field_id = requested_field_ids[i];
             epan_dissect_prime_with_hfid(epan_dissect, requested_field_id);
+            gint32 parent_id = proto_registrar_get_parent(requested_field_id);
+            if (parent_id >= 0)
+            {
+                epan_dissect_prime_with_hfid(&session->current_epan_dissect, parent_id);
+            }
         }
     }
     else
@@ -829,7 +834,7 @@ buffer_t *ls_buffer_new_from_tvbuff(tvbuff_t *tvbuff)
     return buffer;
 }
 
-static void ls_current_epan_packet_free()
+static void ls_current_epan_packet_free(void)
 {
     if (session->current_epan_packet != NULL)
     {
@@ -867,6 +872,11 @@ epan_packet_t *ls_session_get_epan_packet(gint32 packet_id, const gint32 include
         {
             gint32 requested_field_id = requested_field_ids[i];
             epan_dissect_prime_with_hfid(&session->current_epan_dissect, requested_field_id);
+            gint32 parent_id = proto_registrar_get_parent(requested_field_id);
+            if (parent_id >= 0)
+            {
+                epan_dissect_prime_with_hfid(&session->current_epan_dissect, parent_id);
+            }
         }
     }
     else

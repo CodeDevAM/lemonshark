@@ -108,6 +108,28 @@ public class LemonShark
     public static int WiresharkPatchVersion => ls_version_get_wireshark_patch();
 
     [DllImport(LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern int ls_version_get_target_wireshark_major();
+    public static int TargetWiresharkMajorVersion => ls_version_get_target_wireshark_major();
+
+    [DllImport(LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern int ls_version_get_target_wireshark_minor();
+
+    public static int TargetWiresharkMinorVersion => ls_version_get_target_wireshark_minor();
+
+    [DllImport(LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern int ls_version_get_target_wireshark_patch();
+
+    public static int TargetWiresharkPatchVersion => ls_version_get_target_wireshark_patch();
+
+    public static void CheckWiresharkVersion()
+    {
+        if (WiresharkMajorVersion < TargetWiresharkMajorVersion || WiresharkMinorVersion < TargetWiresharkMinorVersion)
+        {
+            throw new InvalidOperationException($"Wireshark version must be at least {TargetWiresharkMajorVersion}.{TargetWiresharkMinorVersion}.");
+        }
+    }
+
+    [DllImport(LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void ls_memory_free(IntPtr memory);
 
     internal static void FreeMemory(IntPtr memory)

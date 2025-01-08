@@ -476,7 +476,7 @@ namespace LemonShark
                         EpanFieldStruct child = GetChildStruct(i);
                         result.Add(child);
                     }
-                    DoForEachChild(result.Add, false);
+
                     return result;
                 }
             }
@@ -501,7 +501,7 @@ namespace LemonShark
                         EpanField child = GetChild(i);
                         result.Add(child);
                     }
-                    DoForEachChild(result.Add, false);
+
                     return result;
                 }
             }

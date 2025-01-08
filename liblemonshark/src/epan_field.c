@@ -63,6 +63,10 @@ gint32 ls_epan_field_valid_get(epan_field_t *epan_field)
 const char *ls_epan_field_representation_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return NULL;
+    }
     const char *representation = current_field_info->rep->representation;
     return representation;
 }
@@ -70,6 +74,10 @@ const char *ls_epan_field_representation_get(epan_field_t *epan_field)
 gint32 ls_epan_field_id_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return -1;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
     gint32 id = current_header_field_info->id;
     return id;
@@ -78,6 +86,10 @@ gint32 ls_epan_field_id_get(epan_field_t *epan_field)
 gint32 ls_epan_field_type_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return FT_NONE;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
     gint32 type = current_header_field_info->type;
     return type;
@@ -86,6 +98,10 @@ gint32 ls_epan_field_type_get(epan_field_t *epan_field)
 const char *ls_epan_field_name_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return NULL;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
     const char *name = current_header_field_info->abbrev;
     return name;
@@ -94,6 +110,10 @@ const char *ls_epan_field_name_get(epan_field_t *epan_field)
 const char *ls_epan_field_display_name_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return NULL;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
     const char *display_name = current_header_field_info->name;
     return display_name;
@@ -102,6 +122,10 @@ const char *ls_epan_field_display_name_get(epan_field_t *epan_field)
 const char *ls_epan_field_type_name_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return NULL;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
     const char *type_name = ftype_name(current_header_field_info->type);
     return type_name;
@@ -110,6 +134,10 @@ const char *ls_epan_field_type_name_get(epan_field_t *epan_field)
 gint32 ls_epan_field_buffer_length_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     tvbuff_t *tvbuff = current_field_info->ds_tvb;
     gint32 buffer_length = tvbuff == NULL ? 0 : (gint32)(tvb_captured_length(tvbuff) & 0x7FFFFFFF);
     return buffer_length;
@@ -118,6 +146,10 @@ gint32 ls_epan_field_buffer_length_get(epan_field_t *epan_field)
 gint32 ls_epan_field_buffer_get(epan_field_t *epan_field, guint8 *target, gint32 max_length)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     tvbuff_t *tvbuff = current_field_info->ds_tvb;
     gint32 length = tvbuff == NULL ? 0 : (gint32)(tvb_captured_length(tvbuff) & 0x7FFFFFFF);
     if (tvbuff == NULL)
@@ -134,6 +166,10 @@ gint32 ls_epan_field_buffer_get(epan_field_t *epan_field, guint8 *target, gint32
 gint32 ls_epan_field_buffer_slice_get(epan_field_t *epan_field, guint8 *target, gint32 max_length)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     tvbuff_t *tvbuff = current_field_info->ds_tvb;
     gint32 length = ls_epan_field_length_get(epan_field);
     if (tvbuff == NULL)
@@ -150,6 +186,10 @@ gint32 ls_epan_field_buffer_slice_get(epan_field_t *epan_field, guint8 *target, 
 gint32 ls_epan_field_offset_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     gint32 offset = current_field_info->start;
     return offset;
 }
@@ -157,6 +197,10 @@ gint32 ls_epan_field_offset_get(epan_field_t *epan_field)
 gint32 ls_epan_field_length_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     gint32 length = (gint32)(current_field_info->length & 0x7FFFFFFF);
     return length;
 }
@@ -164,6 +208,10 @@ gint32 ls_epan_field_length_get(epan_field_t *epan_field)
 gint32 ls_epan_field_hidden_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     gint32 hidden = (current_field_info->flags & FI_HIDDEN) != 0 ? 1 : 0;
     return hidden;
 }
@@ -171,6 +219,10 @@ gint32 ls_epan_field_hidden_get(epan_field_t *epan_field)
 gint32 ls_epan_field_generated_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     gint32 generated = (current_field_info->flags & FI_GENERATED) != 0 ? 1 : 0;
     return generated;
 }
@@ -178,6 +230,10 @@ gint32 ls_epan_field_generated_get(epan_field_t *epan_field)
 gint32 ls_epan_field_encoding_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return ENC_NA;
+    }
     gint32 encoding = ENC_NA;
     if ((current_field_info->flags & FI_BIG_ENDIAN) != 0)
     {
@@ -193,6 +249,10 @@ gint32 ls_epan_field_encoding_get(epan_field_t *epan_field)
 gint64 ls_epan_field_value_get_int64(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
 
     gint64 value = 0;
@@ -270,6 +330,10 @@ guint64 ls_epan_field_value_get_uint64(epan_field_t *epan_field)
 double ls_epan_field_value_get_double(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0.0;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
 
     double value = 0;
@@ -299,6 +363,10 @@ double ls_epan_field_value_get_double(epan_field_t *epan_field)
 const char *ls_epan_field_value_get_string(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return NULL;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
 
     const char *value = NULL;
@@ -331,6 +399,10 @@ const char *ls_epan_field_value_get_string(epan_field_t *epan_field)
 gint32 ls_epan_field_value_get_bytes(epan_field_t *epan_field, guint8 *target, gint32 max_length)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
 
     gint32 length = 0;

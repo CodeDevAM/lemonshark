@@ -34,6 +34,13 @@ class LemonShark:
             liblemonshark.ls_version_get_wireshark_patch.argtypes = []
             liblemonshark.ls_version_get_wireshark_patch.restype = c_int32
 
+            liblemonshark.ls_version_get_target_wireshark_major.argtypes = []
+            liblemonshark.ls_version_get_target_wireshark_major.restype = c_int32
+            liblemonshark.ls_version_get_target_wireshark_minor.argtypes = []
+            liblemonshark.ls_version_get_target_wireshark_minor.restype = c_int32
+            liblemonshark.ls_version_get_target_wireshark_patch.argtypes = []
+            liblemonshark.ls_version_get_target_wireshark_patch.restype = c_int32
+
             liblemonshark.ls_memory_free.argtypes = [c_void_p]
             liblemonshark.ls_memory_free.restype = None
 
@@ -100,16 +107,35 @@ class LemonShark:
         wireshark_major_version: int = liblemonshark.ls_version_get_wireshark_major()
         return wireshark_major_version
 
-    def get_minor_version() -> int:
+    def get_wireshark_minor_version() -> int:
         liblemonshark: CDLL = LemonShark.get_liblemonshark()
         wireshark_minor_version: int = liblemonshark.ls_version_get_wireshark_minor()
         return wireshark_minor_version
 
-    def get_patch_version() -> int:
+    def get_wireshark_patch_version() -> int:
         liblemonshark: CDLL = LemonShark.get_liblemonshark()
         wireshark_patch_version: int = liblemonshark.ls_version_get_wireshark_patch()
         return wireshark_patch_version
+    
+    def get_target_wireshark_major_version() -> int:
+        liblemonshark: CDLL = LemonShark.get_liblemonshark()
+        target_wireshark_major_version: int = liblemonshark.ls_version_get_target_wireshark_major()
+        return target_wireshark_major_version
 
+    def get_target_wireshark_minor_version() -> int:
+        liblemonshark: CDLL = LemonShark.get_liblemonshark()
+        target_wireshark_minor_version: int = liblemonshark.ls_version_get_target_wireshark_minor()
+        return target_wireshark_minor_version
+
+    def get_target_wireshark_patch_version() -> int:
+        liblemonshark: CDLL = LemonShark.get_liblemonshark()
+        target_wireshark_patch_version: int = liblemonshark.ls_version_get_target_wireshark_patch()
+        return target_wireshark_patch_version
+    
+    def check_wireshark_version() -> None:
+        if LemonShark.get_wireshark_major_version() < LemonShark.get_target_wireshark_major_version() or LemonShark.get_wireshark_minor_version() < LemonShark.get_target_wireshark_minor_version():
+            raise Exception(f"Wireshark version must be at least {LemonShark.get_target_wireshark_major_version()}.{LemonShark.get_target_wireshark_minor_version()}.")
+        
     def free_memory(memory: c_void_p):
         if memory is None:
             return

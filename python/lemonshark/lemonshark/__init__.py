@@ -7,7 +7,8 @@ SPDX-License-Identifier: GPL-2.0-only
 from .lemonshark import LemonShark
 from .session import Session
 from .packet import Packet
-from .field import Field, FieldType
+from .field import Field
+from .field_type import FieldType
 from .encoding import Encoding
 from .buffer import Buffer
 from .filter import Filter

@@ -48,6 +48,8 @@ class Session:
 
         if Session.__current_session is not None:
             raise Exception("There can only be one session at a time.")
+        
+        LemonShark.check_wireshark_version()
 
         c_file_path: c_char_p = c_char_p(file_path.encode("utf-8"))
         c_read_filter: c_char_p = c_char_p(read_filter.encode("utf-8"))

@@ -57,6 +57,21 @@ gint32 ls_version_get_wireshark_patch(void)
     return (gint32)patch_version;
 }
 
+gint32 ls_version_get_target_wireshark_major(void)
+{
+    return WIRESHARK_MAJOR_VERSION;
+}
+
+gint32 ls_version_get_target_wireshark_minor(void)
+{
+    return WIRESHARK_MINOR_VERSION;
+}
+
+gint32 ls_version_get_target_wireshark_patch(void)
+{
+    return WIRESHARK_PATCH_VERSION;
+}
+
 void ls_memory_free(void *memory)
 {
     if (memory == NULL)

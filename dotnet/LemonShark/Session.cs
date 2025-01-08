@@ -26,6 +26,8 @@ public class Session : IDisposable
             throw new InvalidOperationException("There can only be one session at a time.");
         }
 
+        LemonShark.CheckWiresharkVersion();
+
         IntPtr utf8FilePath = Util.StringToNativeUtf8(filePath);
 
         IntPtr utf8ReadFilter = Util.StringToNativeUtf8(readFilter);
@@ -140,15 +142,15 @@ public class Session : IDisposable
         IntPtr errorMessage = default;
         IntPtr packetReference = IntPtr.Zero;
 
-        if (requestedFieldIds is null || requestedFieldIds.Length == 0)
+        if (requestedFieldIds is null || requestedFieldIds.Length == 0 || requestedFieldIdCount <= 0)
         {
             packetReference = ls_session_get_packet(packetId, includeBuffers ? 1 : 0, includeColumns ? 1 : 0, includeRepresentations ? 1 : 0, includeStrings ? 1 : 0, includeBytes ? 1 : 0, IntPtr.Zero, 0, ref errorMessage);
         }
         else
         {
-            if (requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length)
+            if (requestedFieldIdCount > requestedFieldIds.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(requestedFieldIdCount), requestedFieldIdCount, "requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length");
+                throw new ArgumentOutOfRangeException(nameof(requestedFieldIdCount), requestedFieldIdCount, "requestedFieldIdCount > requestedFieldIds.Length");
             }
 
             GCHandle requestedFieldsHandle = GCHandle.Alloc(requestedFieldIds, GCHandleType.Pinned);
@@ -156,7 +158,16 @@ public class Session : IDisposable
             try
             {
                 IntPtr requestedFieldsReference = requestedFieldsHandle.AddrOfPinnedObject();
-                packetReference = ls_session_get_packet(packetId, includeBuffers ? 1 : 0, includeColumns ? 1 : 0, includeRepresentations ? 1 : 0, includeStrings ? 1 : 0, includeBytes ? 1 : 0, requestedFieldsReference, requestedFieldIdCount, ref errorMessage);
+                packetReference = ls_session_get_packet(
+                    packetId,
+                    includeBuffers ? 1 : 0,
+                    includeColumns ? 1 : 0,
+                    includeRepresentations ? 1 : 0,
+                    includeStrings ? 1 : 0,
+                    includeBytes ? 1 : 0,
+                    requestedFieldsReference,
+                    requestedFieldIdCount,
+                    ref errorMessage);
             }
             finally
             {
@@ -204,15 +215,15 @@ public class Session : IDisposable
         IntPtr errorMessage = default;
         IntPtr epanPacketReference = IntPtr.Zero;
 
-        if (requestedFieldIds is null || requestedFieldIds.Length == 0 || requestedFieldIdCount == 0)
+        if (requestedFieldIds is null || requestedFieldIds.Length == 0 || requestedFieldIdCount <= 0)
         {
             epanPacketReference = ls_session_get_epan_packet(packetId, includeColumns ? 1 : 0, IntPtr.Zero, 0, ref errorMessage);
         }
         else
         {
-            if (requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length)
+            if (requestedFieldIdCount > requestedFieldIds.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(requestedFieldIdCount), requestedFieldIdCount, "requestedFieldIdCount < 0 || requestedFieldIdCount > requestedFieldIds.Length");
+                throw new ArgumentOutOfRangeException(nameof(requestedFieldIdCount), requestedFieldIdCount, "requestedFieldIdCount > requestedFieldIds.Length");
             }
 
             GCHandle requestedFieldsHandle = GCHandle.Alloc(requestedFieldIds, GCHandleType.Pinned);

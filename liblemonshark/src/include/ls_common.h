@@ -35,6 +35,12 @@ extern "C"
 
     WS_DLL_PUBLIC gint32 ls_version_get_wireshark_patch(void);
 
+    WS_DLL_PUBLIC gint32 ls_version_get_target_wireshark_major(void);
+
+    WS_DLL_PUBLIC gint32 ls_version_get_target_wireshark_minor(void);
+
+    WS_DLL_PUBLIC gint32 ls_version_get_target_wireshark_patch(void);
+
     WS_DLL_PUBLIC void ls_memory_free(void *memory);
 
     WS_DLL_PUBLIC gint32 ls_ok(void);

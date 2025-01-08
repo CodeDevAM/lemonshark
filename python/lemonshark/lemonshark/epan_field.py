@@ -8,7 +8,7 @@ from ctypes import *
 from typing import *
 
 from .lemonshark import LemonShark
-from .field import FieldType
+from .field_type import FieldType
 
 
 class EpanField:
@@ -354,7 +354,7 @@ class EpanField:
     def get_children(self) -> List["EpanField"]:
         self.throw_if_not_valid()
         children_count: int = self.get_children_count()
-        children: List[EpanField] = []
+        children: List["EpanField"] = []
         for i in range(children_count):
             child: EpanField = self.get_child(i)
             children.append(child)
