@@ -43,6 +43,8 @@ extern "C"
 
     WS_DLL_PUBLIC void ls_memory_free(void *memory);
 
+    WS_DLL_PUBLIC gint64 ls_string_length_get(const char *string);
+
     WS_DLL_PUBLIC gint32 ls_ok(void);
 
     WS_DLL_PUBLIC gint32 ls_error(void);

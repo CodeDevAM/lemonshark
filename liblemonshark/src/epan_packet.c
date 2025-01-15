@@ -10,8 +10,10 @@ SPDX-License-Identifier: GPL-2.0-only
 #include "epan/column.h"
 
 // lemonshark includes
+#include "ls_common.h"
 #include "epan_packet.h"
 #include "epan_field.h"
+#include "field.h"
 
 epan_packet_t *ls_epan_packet_new(void)
 {
@@ -113,6 +115,13 @@ const char *ls_epan_packet_protocol_column_get(epan_packet_t *epan_packet)
     return protocol_column;
 }
 
+gint64 ls_epan_packet_protocol_column_length(epan_packet_t *epan_packet)
+{
+    const char *protocol_column = ls_epan_packet_protocol_column_get(epan_packet);
+    gint64 length = ls_string_length_get(protocol_column);
+    return length;
+}
+
 void ls_epan_packet_protocol_column_set(epan_packet_t *epan_packet, const char *protocol_column)
 {
     if (epan_packet->epan_dissect->pi.cinfo == NULL)
@@ -133,6 +142,13 @@ const char *ls_epan_packet_info_column_get(epan_packet_t *epan_packet)
 
     const char *info_column = col_get_text(epan_packet->epan_dissect->pi.cinfo, COL_INFO);
     return info_column;
+}
+
+gint64 ls_epan_packet_info_column_length(epan_packet_t *epan_packet)
+{
+    const char *info_column = ls_epan_packet_info_column_get(epan_packet);
+    gint64 length = ls_string_length_get(info_column);
+    return length;
 }
 
 void ls_epan_packet_info_column_set(epan_packet_t *epan_packet, const char *info_column)
@@ -171,4 +187,70 @@ gint32 ls_epan_packet_buffer_get(epan_packet_t *epan_packet, guint8 *target, gin
     tvb_memcpy(epan_packet->epan_dissect->tvb, target, 0, length);
 
     return length;
+}
+
+typedef struct get_field_count_data
+{
+    gint32 field_count;
+    gint32 int64_count;
+    gint32 uint64_count;
+    gint32 double_count;
+    gint32 string_count;
+    gint32 bytes_count;
+} get_field_count_data_t;
+
+static void ls_epan_field_count(proto_node *node, gpointer data)
+{
+    get_field_count_data_t *get_field_count_data = (get_field_count_data_t *)data;
+
+    get_field_count_data->field_count += 1;
+
+    const field_info *current_field_info = node->finfo;
+    enum ftenum type = current_field_info->hfinfo->type;
+
+    if (ls_field_type_is_int64(type))
+    {
+        get_field_count_data->int64_count += 1;
+    }
+    else if (ls_field_type_is_uint64(type))
+    {
+        get_field_count_data->uint64_count += 1;
+    }
+    else if (ls_field_type_is_double(type))
+    {
+        get_field_count_data->double_count += 1;
+    }
+    else if (ls_field_type_is_string(type))
+    {
+        get_field_count_data->string_count += 1;
+    }
+    else if (ls_field_type_is_bytes(type))
+    {
+        get_field_count_data->bytes_count += 1;
+    }
+
+    proto_tree_children_foreach(node, ls_epan_field_count, get_field_count_data);
+}
+
+void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_count, gint32 *int64_count, gint32 *uint64_count, gint32 *double_count, gint32 *string_count, gint32 *bytes_count)
+{
+    get_field_count_data_t get_field_count_data = {
+        .field_count = 0,
+        .int64_count = 0,
+        .uint64_count = 0,
+        .double_count = 0,
+        .string_count = 0,
+        .bytes_count = 0};
+
+    if (epan_packet != NULL && epan_packet->epan_dissect != NULL && epan_packet->epan_dissect->tree != NULL)
+    {
+        proto_tree_children_foreach(epan_packet->epan_dissect->tree, ls_epan_field_count, &get_field_count_data);
+    }
+
+    *field_count = get_field_count_data.field_count;
+    *int64_count = get_field_count_data.int64_count;
+    *uint64_count = get_field_count_data.uint64_count;
+    *double_count = get_field_count_data.double_count;
+    *string_count = get_field_count_data.string_count;
+    *bytes_count = get_field_count_data.bytes_count;
 }

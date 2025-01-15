@@ -75,6 +75,9 @@ class EpanPacket:
             liblemonshark.ls_epan_packet_buffer_get.argtypes = [c_void_p, c_void_p, c_int32]
             liblemonshark.ls_epan_packet_buffer_get.restype = c_int32
 
+            liblemonshark.ls_epan_packet_field_count_get.argtypes = [c_void_p, POINTER(c_int32), POINTER(c_int32), POINTER(c_int32), POINTER(c_int32), POINTER(c_int32), POINTER(c_int32)]
+            liblemonshark.ls_epan_packet_field_count_get.restype = None
+
             EpanPacket.__liblemonshark_initialized = True
 
         return liblemonshark
@@ -223,4 +226,20 @@ class EpanPacket:
         c_buffer: c_char_p = c_char_p(buffer)
         liblemonshark.ls_epan_packet_buffer_get(self.c_epan_packet, c_buffer, length)
         return buffer
+    
+    def get_field_count(self) -> Tuple[int, int, int, int, int, int]:
+        self.throw_if_not_valid()
+        liblemonshark: CDLL = EpanPacket.get_liblemonshark()
+
+        c_field_count: c_int32 = c_int32(0)
+        c_int64_count: c_int32 = c_int32(0)
+        c_uint64_count: c_int32 = c_int32(0)
+        c_double_count: c_int32 = c_int32(0)
+        c_string_count: c_int32 = c_int32(0)
+        c_bytes_count: c_int32 = c_int32(0)
+
+        liblemonshark.ls_epan_packet_field_count_get(self.c_epan_packet, byref(c_field_count), byref(c_int64_count), byref(c_uint64_count), byref(c_double_count), byref(c_string_count), byref(c_bytes_count))
+
+        result: Tuple[int, int, int, int, int, int] = (c_field_count.value, c_int64_count.value, c_uint64_count.value, c_double_count.value, c_string_count.value, c_bytes_count.value)
+        return result
     

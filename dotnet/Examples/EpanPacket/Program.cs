@@ -47,13 +47,21 @@ try
         }
 
         // Using EpanPacketStruct and EpanFieldStruct is the recommended approach when performance is critical
-        using EpanPacketStruct epanPacket = session.GetEpanPacketStruct(packetId, true, requestedFieldIds);
+        using EpanPacketStruct epanPacket = session.GetEpanPacketStruct(packetId, true, requestedFieldIds, requestedFieldIds.Length);
+        PrintPacketStats(epanPacket);
         PrintPacket(epanPacket);
     }
 }
 catch (Exception ex)
 {
     Console.WriteLine(ex);
+}
+
+static void PrintPacketStats(EpanPacketStruct epanPacket)
+{
+    epanPacket.GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount);
+
+    Console.WriteLine($"Field count: {fieldCount}, Int64 count: {int64Count}, UInt64 count: {uint64Count}, Double count: {doubleCount}, String count: {stringCount}, Bytes count: {bytesCount}");
 }
 
 static void PrintPacket(EpanPacketStruct epanPacket)

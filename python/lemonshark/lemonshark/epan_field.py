@@ -50,11 +50,11 @@ class EpanField:
             liblemonshark.ls_epan_field_type_name_get.argtypes = [c_void_p]
             liblemonshark.ls_epan_field_type_name_get.restype = c_char_p
 
-            liblemonshark.ls_epan_field_buffer_length_get.argtypes = [c_void_p]
-            liblemonshark.ls_epan_field_buffer_length_get.restype = c_int32
+            liblemonshark.ls_epan_field_underlying_buffer_length_get.argtypes = [c_void_p]
+            liblemonshark.ls_epan_field_underlying_buffer_length_get.restype = c_int32
 
-            liblemonshark.ls_epan_field_buffer_get.argtypes = [c_void_p, c_void_p, c_int32]
-            liblemonshark.ls_epan_field_buffer_get.restype = c_int32
+            liblemonshark.ls_epan_field_underlying_buffer_get.argtypes = [c_void_p, c_void_p, c_int32]
+            liblemonshark.ls_epan_field_underlying_buffer_get.restype = c_int32
 
             liblemonshark.ls_epan_field_buffer_slice_get.argtypes = [c_void_p, c_void_p, c_int32]
             liblemonshark.ls_epan_field_buffer_slice_get.restype = c_int32
@@ -88,6 +88,9 @@ class EpanField:
 
             liblemonshark.ls_epan_field_value_get_bytes.argtypes = [c_void_p, c_void_p, c_int32]
             liblemonshark.ls_epan_field_value_get_bytes.restype = c_int32
+
+            liblemonshark.ls_epan_field_value_bytes_length.argtypes = [c_void_p]
+            liblemonshark.ls_epan_field_value_bytes_length.restype = c_int64
 
             liblemonshark.ls_epan_field_children_count.argtypes = [c_void_p]
             liblemonshark.ls_epan_field_children_count.restype = c_int32
@@ -198,20 +201,20 @@ class EpanField:
 
         return type_name
     
-    def get_buffer_length(self) -> int:
+    def get_underlying_buffer_length(self) -> int:
         self.throw_if_not_valid()
         liblemonshark: CDLL = EpanField.get_liblemonshark()
-        buffer_length: int = liblemonshark.ls_epan_field_buffer_length_get(self.c_epan_field)
-        return buffer_length
+        underlying_buffer_length: int = liblemonshark.ls_epan_field_underlying_buffer_length_get(self.c_epan_field)
+        return underlying_buffer_length
     
-    def get_buffer(self) -> bytes:
+    def get_underlying_buffer(self) -> bytes:
         self.throw_if_not_valid()
         liblemonshark: CDLL = EpanField.get_liblemonshark()
-        buffer_length: int = self.get_buffer_length()
-        buffer: bytes = bytes(buffer_length)
-        c_buffer: c_char_p = c_char_p(buffer)
-        liblemonshark.ls_epan_field_buffer_get(self.c_epan_field, c_buffer, buffer_length)
-        return buffer
+        underlying_buffer_length: int = self.get_underlying_buffer_length()
+        underlying_buffer: bytes = bytes(underlying_buffer_length)
+        c_underlying_buffer: c_char_p = c_char_p(underlying_buffer)
+        liblemonshark.ls_epan_field_buffer_get(self.c_epan_field, c_underlying_buffer, underlying_buffer_length)
+        return underlying_buffer
     
     def get_buffer_slice(self) -> bytes:
         self.throw_if_not_valid()
@@ -321,7 +324,7 @@ class EpanField:
     def get_bytes_value(self) -> bytes:
         self.throw_if_not_valid()
         liblemonshark: CDLL = EpanField.get_liblemonshark()
-        length: int = self.get_length()
+        length: int = liblemonshark.ls_epan_field_value_bytes_length()
         if length <= 0:
             return None
         buffer: bytes = bytes(length)

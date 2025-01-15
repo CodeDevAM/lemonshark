@@ -82,6 +82,16 @@ void ls_memory_free(void *memory)
     g_free(memory);
 }
 
+gint64 ls_string_length_get(const char *string)
+{
+    if (string == NULL)
+    {
+        return 0;
+    }
+
+    return (gint64)strlen(string);
+}
+
 gint32 ls_ok(void)
 {
     return LS_OK;

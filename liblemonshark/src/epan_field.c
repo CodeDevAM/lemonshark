@@ -10,6 +10,7 @@ SPDX-License-Identifier: GPL-2.0-only
 #include "epan/proto.h"
 
 // lemonshark includes
+#include "ls_common.h"
 #include "epan_field.h"
 #include "epan_packet.h"
 
@@ -71,6 +72,13 @@ const char *ls_epan_field_representation_get(epan_field_t *epan_field)
     return representation;
 }
 
+gint64 ls_epan_field_representation_length(epan_field_t *epan_field)
+{
+    const char *representation = ls_epan_field_representation_get(epan_field);
+    gint64 length = ls_string_length_get(representation);
+    return length;
+}
+
 gint32 ls_epan_field_id_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
@@ -107,6 +115,13 @@ const char *ls_epan_field_name_get(epan_field_t *epan_field)
     return name;
 }
 
+gint64 ls_epan_field_name_length(epan_field_t *epan_field)
+{
+    const char *name = ls_epan_field_name_get(epan_field);
+    gint64 length = ls_string_length_get(name);
+    return length;
+}
+
 const char *ls_epan_field_display_name_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
@@ -117,6 +132,13 @@ const char *ls_epan_field_display_name_get(epan_field_t *epan_field)
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
     const char *display_name = current_header_field_info->name;
     return display_name;
+}
+
+gint64 ls_epan_field_display_name_length(epan_field_t *epan_field)
+{
+    const char *display_name = ls_epan_field_display_name_get(epan_field);
+    gint64 length = ls_string_length_get(display_name);
+    return length;
 }
 
 const char *ls_epan_field_type_name_get(epan_field_t *epan_field)
@@ -131,7 +153,14 @@ const char *ls_epan_field_type_name_get(epan_field_t *epan_field)
     return type_name;
 }
 
-gint32 ls_epan_field_buffer_length_get(epan_field_t *epan_field)
+gint64 ls_epan_field_type_name_length(epan_field_t *epan_field)
+{
+    const char *type_name = ls_epan_field_type_name_get(epan_field);
+    gint64 length = ls_string_length_get(type_name);
+    return length;
+}
+
+gint32 ls_epan_field_underlying_buffer_length_get(epan_field_t *epan_field)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
     if (current_field_info == NULL)
@@ -143,7 +172,7 @@ gint32 ls_epan_field_buffer_length_get(epan_field_t *epan_field)
     return buffer_length;
 }
 
-gint32 ls_epan_field_buffer_get(epan_field_t *epan_field, guint8 *target, gint32 max_length)
+gint32 ls_epan_field_underlying_buffer_get(epan_field_t *epan_field, guint8 *target, gint32 max_length)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
     if (current_field_info == NULL)
@@ -171,10 +200,15 @@ gint32 ls_epan_field_buffer_slice_get(epan_field_t *epan_field, guint8 *target, 
         return 0;
     }
     tvbuff_t *tvbuff = current_field_info->ds_tvb;
-    gint32 length = ls_epan_field_length_get(epan_field);
     if (tvbuff == NULL)
     {
-        return length;
+        return 0;
+    }
+
+    gint32 length = ls_epan_field_length_get(epan_field);
+    if (length <= 0)
+    {
+        return 0;
     }
 
     length = max_length < length ? max_length : length;
@@ -396,6 +430,13 @@ const char *ls_epan_field_value_get_string(epan_field_t *epan_field)
     return value;
 }
 
+gint64 ls_epan_field_value_string_length(epan_field_t *epan_field)
+{
+    const char *string_value = ls_epan_field_value_get_string(epan_field);
+    gint64 length = ls_string_length_get(string_value);
+    return length;
+}
+
 gint32 ls_epan_field_value_get_bytes(epan_field_t *epan_field, guint8 *target, gint32 max_length)
 {
     const field_info *current_field_info = epan_field->tree_node->finfo;
@@ -478,6 +519,58 @@ gint32 ls_epan_field_value_get_bytes(epan_field_t *epan_field, guint8 *target, g
         {
             length = 0;
         }
+    }
+    break;
+    default:
+        break;
+    }
+
+    return length;
+}
+
+gint64 ls_epan_field_value_bytes_length(epan_field_t *epan_field)
+{
+    const field_info *current_field_info = epan_field->tree_node->finfo;
+    if (current_field_info == NULL)
+    {
+        return 0;
+    }
+    const header_field_info *current_header_field_info = current_field_info->hfinfo;
+
+    gint64 length = 0;
+
+    switch (current_header_field_info->type)
+    {
+    case FT_ETHER:
+    case FT_BYTES:
+    case FT_UINT_BYTES:
+    {
+        length = fvalue_get_bytes_size(current_field_info->value);
+    }
+    break;
+
+    case FT_IPv6:
+    {
+        length = 16;
+    }
+    break;
+    case FT_GUID:
+    {
+        length = 16;
+    }
+    break;
+    case FT_OID:
+    case FT_VINES:
+    case FT_REL_OID:
+    case FT_SYSTEM_ID:
+    case FT_FCWWN:
+    {
+        length = fvalue_get_bytes_size(current_field_info->value);
+    }
+    break;
+    case FT_PROTOCOL:
+    {
+        length = ls_epan_field_length_get(epan_field);
     }
     break;
     default:

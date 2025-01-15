@@ -111,6 +111,12 @@ def print_packet(epan_packet: EpanPacket) -> None:
 
     print("")
 
+
+def print_packet_stats(epan_packet: EpanPacket) -> None:
+    (field_count, int64_count, uint64_count, double_count, string_count, bytes_count) = epan_packet.get_field_count()
+    
+    print(f"Field count: {field_count}, Int64 count: {int64_count}, UInt64 count: {uint64_count}, Double count: {double_count}, String count: {string_count}, Bytes count: {bytes_count}");
+
 def main():
     wireshark_directory: str = None
     if system == "windows":
@@ -138,7 +144,7 @@ def main():
                 continue
 
             epan_packet: EpanPacket = session.get_epan_packet(packet_id, True, requested_field_ids)
-
+            print_packet_stats(epan_packet)
             print_packet(epan_packet)
 
     except Exception as ex:

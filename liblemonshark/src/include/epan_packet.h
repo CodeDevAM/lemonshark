@@ -50,9 +50,13 @@ extern "C"
 
     WS_DLL_PUBLIC const char *ls_epan_packet_protocol_column_get(epan_packet_t *epan_packet);
 
+    WS_DLL_PUBLIC gint64 ls_epan_packet_protocol_column_length(epan_packet_t *epan_packet);
+
     WS_DLL_PUBLIC void ls_epan_packet_protocol_column_set(epan_packet_t *epan_packet, const char *protocol_column);
 
     WS_DLL_PUBLIC const char *ls_epan_packet_info_column_get(epan_packet_t *epan_packet);
+
+    WS_DLL_PUBLIC gint64 ls_epan_packet_info_column_length(epan_packet_t *epan_packet);
 
     WS_DLL_PUBLIC void ls_epan_packet_info_column_set(epan_packet_t *epan_packet, const char *info_column);
 
@@ -63,6 +67,8 @@ extern "C"
     WS_DLL_PUBLIC gint32 ls_epan_packet_ignored_get(epan_packet_t *epan_packet);
 
     WS_DLL_PUBLIC gint32 ls_epan_packet_buffer_get(epan_packet_t *epan_packet, guint8 *target, gint32 max_length);
+
+    WS_DLL_PUBLIC void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_count, gint32 *int64_count, gint32 *uint64_count, gint32 *double_count, gint32 *string_count, gint32 *bytes_count);
 
 #ifdef __cplusplus
 }

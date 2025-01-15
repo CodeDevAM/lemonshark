@@ -198,6 +198,31 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern long ls_epan_packet_protocol_column_length(IntPtr epan_packet);
+
+            public int GetProtocolColumnLength()
+            {
+                ThrowIfNotValid();
+                long length = ls_epan_packet_protocol_column_length(EpanPacketReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawProtocolColumn()
+            {
+                ThrowIfNotValid();
+                IntPtr protocolColumnReference = ls_epan_packet_protocol_column_get(EpanPacketReference);
+                return protocolColumnReference;
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             private static extern IntPtr ls_epan_packet_info_column_get(IntPtr epan_packet);
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -230,6 +255,30 @@ namespace LemonShark
                         Marshal.FreeHGlobal(utf8Value);
                     }
                 }
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern long ls_epan_packet_info_column_length(IntPtr epan_packet);
+            public int GetInfoColumnLength()
+            {
+                ThrowIfNotValid();
+                long length = ls_epan_packet_info_column_length(EpanPacketReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawInfoColumn()
+            {
+                ThrowIfNotValid();
+                IntPtr infoColumnReference = ls_epan_packet_info_column_get(EpanPacketReference);
+                return infoColumnReference;
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -271,7 +320,7 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-            private static extern int ls_epan_packet_buffer_get(IntPtr packet, byte[] target, int max_length);
+            private static extern int ls_epan_packet_buffer_get(IntPtr epan_packet, byte[] target, int max_length);
             public byte[] Buffer
             {
                 get
@@ -284,6 +333,22 @@ namespace LemonShark
 
                     return result;
                 }
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern void ls_epan_packet_field_count_get(IntPtr epan_packet, ref int field_count, ref int int64_count, ref int uint64_count, ref int double_count, ref int string_count, ref int bytes_count);
+
+            public void GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount)
+            {
+                fieldCount = 0;
+                int64Count = 0;
+                uint64Count = 0;
+                doubleCount = 0;
+                stringCount = 0;
+                bytesCount = 0;
+
+                ThrowIfNotValid();
+                ls_epan_packet_field_count_get(EpanPacketReference, ref fieldCount, ref int64Count, ref uint64Count, ref doubleCount, ref stringCount, ref bytesCount);
             }
         }
     }
@@ -338,6 +403,9 @@ namespace LemonShark
             }
         }
 
+        public int GetProtocolColumnLength() => EpanPacketStruct.GetProtocolColumnLength();
+        public IntPtr GetRawProtocolColumn() => EpanPacketStruct.GetRawProtocolColumn();
+
         public string InfoColumn
         {
             get
@@ -350,6 +418,9 @@ namespace LemonShark
             }
         }
 
+        public int GetInfoColumnLength() => EpanPacketStruct.GetInfoColumnLength();
+        public IntPtr GetRawInfoColumn() => EpanPacketStruct.GetRawInfoColumn();
+
         public bool Visited => EpanPacketStruct.Visited;
 
         public bool Visible => EpanPacketStruct.Visible;
@@ -357,6 +428,11 @@ namespace LemonShark
         public bool Ignored => EpanPacketStruct.Ignored;
 
         public byte[] Buffer => EpanPacketStruct.Buffer;
+
+        public void GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount)
+        {
+            EpanPacketStruct.GetFieldCount(out fieldCount, out int64Count, out uint64Count, out doubleCount, out stringCount, out bytesCount);
+        }
     }
 }
 

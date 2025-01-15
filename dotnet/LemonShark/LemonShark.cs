@@ -142,6 +142,18 @@ public class LemonShark
     }
 
     [DllImport(LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern long ls_string_length_get(IntPtr value);
+
+    internal static long GetStringLength(IntPtr value)
+    {
+        if (value == IntPtr.Zero)
+        {
+            return 0;
+        }
+        return ls_string_length_get(value);
+    }
+
+    [DllImport(LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern int ls_ok();
 
     public static int Ok => ls_ok();

@@ -48,7 +48,7 @@ internal class Program
                     continue;
                 }
 
-                Packet packet = session.GetPacket(packetId, true, true, true, true, true, null);
+                Packet packet = session.GetPacket(packetId, true, true, true, true, true, null, 0);
                 PrintPacket(packet);
             }
         }

@@ -89,6 +89,32 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern long ls_epan_field_representation_length(IntPtr epan_field);
+
+            public int GetRepresentationLength()
+            {
+                ThrowIfNotValid();
+
+                long length = ls_epan_field_representation_length(EpanFieldReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawRepresentation()
+            {
+                ThrowIfNotValid();
+                IntPtr representationReference = ls_epan_field_representation_get(EpanFieldReference);
+                return representationReference;
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             private static extern int ls_epan_field_id_get(IntPtr epan_field);
             public int Id
             {
@@ -130,6 +156,30 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern long ls_epan_field_name_length(IntPtr epan_field);
+            public int GetNameLength()
+            {
+                ThrowIfNotValid();
+                long length = ls_epan_field_name_length(EpanFieldReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawName()
+            {
+                ThrowIfNotValid();
+                IntPtr nameReference = ls_epan_field_name_get(EpanFieldReference);
+                return nameReference;
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             private static extern IntPtr ls_epan_field_display_name_get(IntPtr epan_field);
             public string DisplayName
             {
@@ -144,6 +194,31 @@ namespace LemonShark
                     string result = Util.NativeUtf8ToString(displayNameReference);
                     return result;
                 }
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern long ls_epan_field_display_name_length(IntPtr epan_field);
+
+            public int GetDisplayNameLength()
+            {
+                ThrowIfNotValid();
+                long length = ls_epan_field_display_name_length(EpanFieldReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawDisplayName()
+            {
+                ThrowIfNotValid();
+                IntPtr displayNameReference = ls_epan_field_display_name_get(EpanFieldReference);
+                return displayNameReference;
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -164,29 +239,53 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-            private static extern int ls_epan_field_buffer_length_get(IntPtr epan_field);
-            public int BufferLength
+            private static extern long ls_epan_field_type_name_length(IntPtr epan_field);
+            public int GetTypeNameLength()
+            {
+                ThrowIfNotValid();
+                long length = ls_epan_field_type_name_length(EpanFieldReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawTypeName()
+            {
+                ThrowIfNotValid();
+                IntPtr typeNameReference = ls_epan_field_type_name_get(EpanFieldReference);
+                return typeNameReference;
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern int ls_epan_field_underlying_buffer_length_get(IntPtr epan_field);
+            public int UnderlyingBufferLength
             {
                 get
                 {
                     ThrowIfNotValid();
 
-                    int bufferLength = ls_epan_field_buffer_length_get(EpanFieldReference);
-                    return bufferLength;
+                    int underlyingBufferLength = ls_epan_field_underlying_buffer_length_get(EpanFieldReference);
+                    return underlyingBufferLength;
                 }
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-            private static extern int ls_epan_field_buffer_get(IntPtr epan_field, byte[] target, int max_length);
-            public byte[] Buffer
+            private static extern int ls_epan_field_underlying_buffer_get(IntPtr epan_field, byte[] target, int max_length);
+            public byte[] UnderlyingBuffer
             {
                 get
                 {
                     ThrowIfNotValid();
 
-                    byte[] result = new byte[BufferLength];
+                    byte[] result = new byte[UnderlyingBufferLength];
 
-                    _ = ls_epan_field_buffer_get(EpanFieldReference, result, result.Length);
+                    _ = ls_epan_field_underlying_buffer_get(EpanFieldReference, result, result.Length);
 
                     return result;
                 }
@@ -350,6 +449,40 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern long ls_epan_field_value_string_length(IntPtr epan_field);
+
+            public int GetStringValueLength()
+            {
+                ThrowIfNotValid();
+                if (!IsString)
+                {
+                    throw new InvalidOperationException("Value is not of type string.");
+                }
+
+                long length = ls_epan_field_value_string_length(EpanFieldReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawStringValue()
+            {
+                ThrowIfNotValid();
+                if (!IsString)
+                {
+                    throw new InvalidOperationException("Value is not of type string.");
+                }
+                IntPtr valueReference = ls_epan_field_value_get_string(EpanFieldReference);
+                return valueReference;
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             private static extern int ls_epan_field_value_get_bytes(IntPtr epan_field, byte[] target, int max_length);
 
             public byte[] BytesValue
@@ -362,13 +495,42 @@ namespace LemonShark
                         throw new InvalidOperationException("Value is not of type string.");
                     }
 
-                    int length = ls_epan_field_length_get(EpanFieldReference);
+                    int length = GetBytesValueLength();
+
+                    if (length <= 0)
+                    {
+                        return null;
+                    }
+
                     byte[] result = new byte[length];
 
                     _ = ls_epan_field_value_get_bytes(EpanFieldReference, result, length);
 
                     return result;
                 }
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern long ls_epan_field_value_bytes_length(IntPtr epan_field);
+
+            public int GetBytesValueLength()
+            {
+                ThrowIfNotValid();
+                if (!IsBytes)
+                {
+                    throw new InvalidOperationException("Value is not of type string.");
+                }
+
+                long length = ls_epan_field_value_bytes_length(EpanFieldReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -533,11 +695,22 @@ namespace LemonShark
 
         public bool Valid => EpanFieldStruct.Valid;
         public string Representation => EpanFieldStruct.Representation;
+        public int GetRepresentationLength() => EpanFieldStruct.GetRepresentationLength();
+        public IntPtr GetRawRepresentation() => EpanFieldStruct.GetRawRepresentation();
         public int Id => EpanFieldStruct.Id;
         public int Type => EpanFieldStruct.Type;
-        public int BufferLength => EpanFieldStruct.BufferLength;
-        public byte[] Buffer => EpanFieldStruct.Buffer;
-        public byte[] BufferSlice => EpanFieldStruct.BufferSlice;
+        public string Name => EpanFieldStruct.Name;
+        public int GetNameLength() => EpanFieldStruct.GetNameLength();
+        public IntPtr GetRawName() => EpanFieldStruct.GetRawName();
+        public string DisplayName => EpanFieldStruct.DisplayName;
+        public int GetDisplayNameLength() => EpanFieldStruct.GetDisplayNameLength();
+        public IntPtr GetRawDisplayName() => EpanFieldStruct.GetRawDisplayName();
+        public string TypeName => EpanFieldStruct.TypeName;
+        public int GetTypeNameLength() => EpanFieldStruct.GetTypeNameLength();
+        public IntPtr GetRawTypeName() => EpanFieldStruct.GetRawTypeName();
+        public int BufferLength => EpanFieldStruct.UnderlyingBufferLength;
+        public byte[] UnderlyingBuffer => EpanFieldStruct.UnderlyingBuffer;
+        public byte[] UnderlyingBufferSlice => EpanFieldStruct.BufferSlice;
         public int Offset => EpanFieldStruct.Offset;
         public int Length => EpanFieldStruct.Length;
         public bool Hidden => EpanFieldStruct.Hidden;
@@ -556,7 +729,8 @@ namespace LemonShark
         public double DoubleValue => EpanFieldStruct.DoubleValue;
 
         public string StringValue => EpanFieldStruct.StringValue;
-
+        public int GetStringValueLength() => EpanFieldStruct.GetStringValueLength();
+        public IntPtr GetRawStringValue() => EpanFieldStruct.GetRawStringValue();
         public byte[] BytesValue => EpanFieldStruct.BytesValue;
         public int ChildrenCount => EpanFieldStruct.ChildrenCount;
 
@@ -571,12 +745,6 @@ namespace LemonShark
         public List<EpanFieldStruct> ChildrenStruct => EpanFieldStruct.ChildrenStruct;
 
         public List<EpanField> Children => EpanFieldStruct.Children;
-
-        public string Name => EpanFieldStruct.Name;
-        public string DisplayName => EpanFieldStruct.DisplayName;
-
-        public string TypeName => EpanFieldStruct.TypeName;
-
     }
 
 }

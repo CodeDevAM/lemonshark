@@ -33,19 +33,27 @@ extern "C"
 
     WS_DLL_PUBLIC const char *ls_epan_field_representation_get(epan_field_t *epan_field);
 
+    WS_DLL_PUBLIC gint64 ls_epan_field_representation_length(epan_field_t *epan_field);
+
     WS_DLL_PUBLIC gint32 ls_epan_field_id_get(epan_field_t *epan_field);
 
     WS_DLL_PUBLIC gint32 ls_epan_field_type_get(epan_field_t *epan_field);
 
     WS_DLL_PUBLIC const char *ls_epan_field_name_get(epan_field_t *epan_field);
 
+    WS_DLL_PUBLIC gint64 ls_epan_field_name_length(epan_field_t *epan_field);
+
     WS_DLL_PUBLIC const char *ls_epan_field_display_name_get(epan_field_t *epan_field);
+
+    WS_DLL_PUBLIC gint64 ls_epan_field_display_name_length(epan_field_t *epan_field);
 
     WS_DLL_PUBLIC const char *ls_epan_field_type_name_get(epan_field_t *epan_field);
 
-    WS_DLL_PUBLIC gint32 ls_epan_field_buffer_length_get(epan_field_t *epan_field);
+    WS_DLL_PUBLIC gint64 ls_epan_field_type_name_length(epan_field_t *epan_field);
 
-    WS_DLL_PUBLIC gint32 ls_epan_field_buffer_get(epan_field_t *epan_field, guint8 *target, gint32 max_length);
+    WS_DLL_PUBLIC gint32 ls_epan_field_underlying_buffer_length_get(epan_field_t *epan_field);
+
+    WS_DLL_PUBLIC gint32 ls_epan_field_underlying_buffer_get(epan_field_t *epan_field, guint8 *target, gint32 max_length);
 
     WS_DLL_PUBLIC gint32 ls_epan_field_buffer_slice_get(epan_field_t *epan_field, guint8 *target, gint32 max_length);
 
@@ -67,7 +75,11 @@ extern "C"
 
     WS_DLL_PUBLIC const char *ls_epan_field_value_get_string(epan_field_t *epan_field);
 
+    WS_DLL_PUBLIC gint64 ls_epan_field_value_string_length(epan_field_t *epan_field);
+
     WS_DLL_PUBLIC gint32 ls_epan_field_value_get_bytes(epan_field_t *epan_field, guint8 *target, gint32 max_length);
+
+    WS_DLL_PUBLIC gint64 ls_epan_field_value_bytes_length(epan_field_t *epan_field);
 
     WS_DLL_PUBLIC gint32 ls_epan_field_children_count(epan_field_t *epan_field);
 

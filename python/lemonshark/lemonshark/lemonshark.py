@@ -44,6 +44,9 @@ class LemonShark:
             liblemonshark.ls_memory_free.argtypes = [c_void_p]
             liblemonshark.ls_memory_free.restype = None
 
+            liblemonshark.ls_string_length_get.argtypes = [c_void_p]
+            liblemonshark.ls_string_length_get.restype = c_int64
+
             liblemonshark.ls_ok.argtypes = []
             liblemonshark.ls_ok.restype = c_int32
 
@@ -136,7 +139,7 @@ class LemonShark:
         if LemonShark.get_wireshark_major_version() < LemonShark.get_target_wireshark_major_version() or LemonShark.get_wireshark_minor_version() < LemonShark.get_target_wireshark_minor_version():
             raise Exception(f"Wireshark version must be at least {LemonShark.get_target_wireshark_major_version()}.{LemonShark.get_target_wireshark_minor_version()}.")
         
-    def free_memory(memory: c_void_p):
+    def free_memory(memory: c_void_p) -> None:
         if memory is None:
             return
         if memory.value is None:
@@ -146,7 +149,7 @@ class LemonShark:
         liblemonshark: CDLL = LemonShark.get_liblemonshark()
         liblemonshark.ls_memory_free(memory)
 
-    def free_memory_at_address(address: int):
+    def free_memory_at_address(address: int) -> None:
         if address is None:
             return
         if address == 0:
@@ -154,6 +157,16 @@ class LemonShark:
         liblemonshark: CDLL = LemonShark.get_liblemonshark()
         memory: c_void_p = c_void_p(address)
         liblemonshark.ls_memory_free(memory)
+
+    def get_string_length(address: int) -> int:
+        if address is None:
+            return 0
+        if address == 0:
+            return 0 
+        liblemonshark: CDLL = LemonShark.get_liblemonshark()
+        string: c_void_p = c_void_p(address)
+        result: int = liblemonshark.ls_string_length_get(string)
+        return result
 
     def ok() -> int:
         liblemonshark: CDLL = LemonShark.get_liblemonshark()
