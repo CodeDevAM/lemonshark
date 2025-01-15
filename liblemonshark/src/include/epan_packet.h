@@ -68,7 +68,7 @@ extern "C"
 
     WS_DLL_PUBLIC gint32 ls_epan_packet_buffer_get(epan_packet_t *epan_packet, guint8 *target, gint32 max_length);
 
-    WS_DLL_PUBLIC void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_count, gint32 *int64_count, gint32 *uint64_count, gint32 *double_count, gint32 *string_count, gint32 *bytes_count);
+    WS_DLL_PUBLIC void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_count, gint32 *int64_count, gint32 *uint64_count, gint32 *double_count, gint32 *string_count, gint32 *bytes_count, gint32 *representation_count);
 
 #ifdef __cplusplus
 }

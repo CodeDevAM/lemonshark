@@ -59,9 +59,9 @@ catch (Exception ex)
 
 static void PrintPacketStats(EpanPacketStruct epanPacket)
 {
-    epanPacket.GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount);
+    epanPacket.GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount, out int representationCount);
 
-    Console.WriteLine($"Field count: {fieldCount}, Int64 count: {int64Count}, UInt64 count: {uint64Count}, Double count: {doubleCount}, String count: {stringCount}, Bytes count: {bytesCount}");
+    Console.WriteLine($"Field count: {fieldCount}, Int64 count: {int64Count}, UInt64 count: {uint64Count}, Double count: {doubleCount}, String count: {stringCount}, Bytes count: {bytesCount}, Representation Count: {representationCount}");
 }
 
 static void PrintPacket(EpanPacketStruct epanPacket)

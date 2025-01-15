@@ -197,6 +197,7 @@ typedef struct get_field_count_data
     gint32 double_count;
     gint32 string_count;
     gint32 bytes_count;
+    gint32 representation_count;
 } get_field_count_data_t;
 
 static void ls_epan_field_count(proto_node *node, gpointer data)
@@ -229,10 +230,15 @@ static void ls_epan_field_count(proto_node *node, gpointer data)
         get_field_count_data->bytes_count += 1;
     }
 
+    if (current_field_info->rep != NULL && current_field_info->rep->representation != NULL)
+    {
+        get_field_count_data->representation_count += 1;
+    }
+
     proto_tree_children_foreach(node, ls_epan_field_count, get_field_count_data);
 }
 
-void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_count, gint32 *int64_count, gint32 *uint64_count, gint32 *double_count, gint32 *string_count, gint32 *bytes_count)
+void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_count, gint32 *int64_count, gint32 *uint64_count, gint32 *double_count, gint32 *string_count, gint32 *bytes_count, gint32 *representation_count)
 {
     get_field_count_data_t get_field_count_data = {
         .field_count = 0,
@@ -240,7 +246,8 @@ void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_co
         .uint64_count = 0,
         .double_count = 0,
         .string_count = 0,
-        .bytes_count = 0};
+        .bytes_count = 0,
+        .representation_count = 0};
 
     if (epan_packet != NULL && epan_packet->epan_dissect != NULL && epan_packet->epan_dissect->tree != NULL)
     {
@@ -253,4 +260,5 @@ void ls_epan_packet_field_count_get(epan_packet_t *epan_packet, gint32 *field_co
     *double_count = get_field_count_data.double_count;
     *string_count = get_field_count_data.string_count;
     *bytes_count = get_field_count_data.bytes_count;
+    *representation_count = get_field_count_data.representation_count;
 }

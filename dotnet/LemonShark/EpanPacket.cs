@@ -336,9 +336,9 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-            private static extern void ls_epan_packet_field_count_get(IntPtr epan_packet, ref int field_count, ref int int64_count, ref int uint64_count, ref int double_count, ref int string_count, ref int bytes_count);
+            private static extern void ls_epan_packet_field_count_get(IntPtr epan_packet, ref int field_count, ref int int64_count, ref int uint64_count, ref int double_count, ref int string_count, ref int bytes_count, ref int representation_count);
 
-            public void GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount)
+            public void GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount, out int representationCount)
             {
                 fieldCount = 0;
                 int64Count = 0;
@@ -346,9 +346,10 @@ namespace LemonShark
                 doubleCount = 0;
                 stringCount = 0;
                 bytesCount = 0;
+                representationCount = 0;
 
                 ThrowIfNotValid();
-                ls_epan_packet_field_count_get(EpanPacketReference, ref fieldCount, ref int64Count, ref uint64Count, ref doubleCount, ref stringCount, ref bytesCount);
+                ls_epan_packet_field_count_get(EpanPacketReference, ref fieldCount, ref int64Count, ref uint64Count, ref doubleCount, ref stringCount, ref bytesCount, ref representationCount);
             }
         }
     }
@@ -429,9 +430,9 @@ namespace LemonShark
 
         public byte[] Buffer => EpanPacketStruct.Buffer;
 
-        public void GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount)
+        public void GetFieldCount(out int fieldCount, out int int64Count, out int uint64Count, out int doubleCount, out int stringCount, out int bytesCount, out int representationCount)
         {
-            EpanPacketStruct.GetFieldCount(out fieldCount, out int64Count, out uint64Count, out doubleCount, out stringCount, out bytesCount);
+            EpanPacketStruct.GetFieldCount(out fieldCount, out int64Count, out uint64Count, out doubleCount, out stringCount, out bytesCount, out representationCount);
         }
     }
 }

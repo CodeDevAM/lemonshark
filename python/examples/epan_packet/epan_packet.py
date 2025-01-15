@@ -113,9 +113,9 @@ def print_packet(epan_packet: EpanPacket) -> None:
 
 
 def print_packet_stats(epan_packet: EpanPacket) -> None:
-    (field_count, int64_count, uint64_count, double_count, string_count, bytes_count) = epan_packet.get_field_count()
+    (field_count, int64_count, uint64_count, double_count, string_count, bytes_count, representation_count) = epan_packet.get_field_count()
     
-    print(f"Field count: {field_count}, Int64 count: {int64_count}, UInt64 count: {uint64_count}, Double count: {double_count}, String count: {string_count}, Bytes count: {bytes_count}");
+    print(f"Field count: {field_count}, Int64 count: {int64_count}, UInt64 count: {uint64_count}, Double count: {double_count}, String count: {string_count}, Bytes count: {bytes_count}, Representation Count: {representation_count}");
 
 def main():
     wireshark_directory: str = None
