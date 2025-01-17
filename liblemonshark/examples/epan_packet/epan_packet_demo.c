@@ -65,6 +65,12 @@ static void print_fields(epan_field_t *epan_field, void *parameter)
 
     g_print(": ");
 
+    const char *value_representation = ls_epan_field_value_representation_get(epan_field);
+    if (value_representation != NULL)
+    {
+        g_print("%s, ", value_representation);
+    }
+
     if (ls_field_type_is_int64(field_type))
     {
         gint64 value = ls_epan_field_value_get_int64(epan_field);
@@ -167,7 +173,7 @@ int main(void)
         return -1;
     }
 
-    field_description_t *frame_length_field_description = ls_field_description_get_by_name("frame.len");
+    field_description_t *frame_length_field_description = ls_field_description_get_by_name("frame.time");
 
     gint32 packet_id = 0;
     while (TRUE)

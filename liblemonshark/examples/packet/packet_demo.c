@@ -66,6 +66,12 @@ static void print_fields(field_t *field, gint32 indentation_count)
 
     g_print(": ");
 
+    const char* value_representation = ls_field_value_representation_get(field);
+    if (value_representation != NULL)
+    {
+        g_print("%s, ", value_representation);
+    }
+
     if (ls_field_type_is_int64(field_type))
     {
         gint64 value = ls_field_value_get_int64(field);

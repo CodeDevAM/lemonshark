@@ -129,6 +129,12 @@ static void PrintFields(EpanFieldStruct epanField, int indentationCount)
 
     Console.Write(": ");
 
+    string valueRepresentation = epanField.ValueRepresentation;
+    if (valueRepresentation is not null)
+    {
+        Console.Write($"{valueRepresentation}, ");
+    }
+
     if (epanField.IsInt64)
     {
         long value = epanField.Int64Value;

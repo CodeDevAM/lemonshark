@@ -92,6 +92,9 @@ class EpanField:
             liblemonshark.ls_epan_field_value_bytes_length.argtypes = [c_void_p]
             liblemonshark.ls_epan_field_value_bytes_length.restype = c_int64
 
+            liblemonshark.ls_epan_field_value_representation_get.argtypes = [c_void_p]
+            liblemonshark.ls_epan_field_value_representation_get.restype = c_char_p
+
             liblemonshark.ls_epan_field_children_count.argtypes = [c_void_p]
             liblemonshark.ls_epan_field_children_count.restype = c_int32
 
@@ -255,12 +258,6 @@ class EpanField:
         encoding: int = liblemonshark.ls_epan_field_encoding_get(self.c_epan_field)
         return encoding
     
-    def get_value_int64(self) -> int:
-        self.throw_if_not_valid()
-        liblemonshark: CDLL = EpanField.get_liblemonshark()
-        value: int = liblemonshark.ls_epan_field_value_get_int64(self.c_epan_field)
-        return value
-    
     def is_int64(self) -> bool:
         self.throw_if_not_valid()
         type: int = self.get_type()
@@ -331,6 +328,18 @@ class EpanField:
         c_buffer: c_char_p = c_char_p(buffer)
         liblemonshark.ls_epan_field_value_get_bytes(self.c_epan_field, c_buffer, length)
         return buffer
+    
+    def get_value_representation(self) -> str:
+        self.throw_if_not_valid()
+        liblemonshark: CDLL = EpanField.get_liblemonshark()
+        c_value_representation: bytes = liblemonshark.ls_epan_field_value_representation_get(self.c_epan_field)
+
+        if c_value_representation is None:
+            return None
+
+        value_representation: str = c_value_representation.decode("utf-8")
+
+        return value_representation
     
     def get_children_count(self) -> int:
         self.throw_if_not_valid()

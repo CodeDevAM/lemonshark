@@ -499,6 +499,41 @@ namespace LemonShark
                 }
             }
 
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern IntPtr ls_field_value_representation_get(IntPtr field);
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern void ls_field_value_representation_set(IntPtr field, IntPtr value_representation);
+
+            public string ValueRepresentation
+            {
+                get
+                {
+                    ThrowIfNotValid();
+                    IntPtr valueRepresentationReference = ls_field_value_representation_get(FieldReference);
+                    if (valueRepresentationReference == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+                    string result = Util.NativeUtf8ToString(valueRepresentationReference);
+                    return result;
+                }
+            }
+
+            public void SetValueRepresentation(string valueRepresentation)
+            {
+                ThrowIfNotValid();
+                IntPtr utf8Value = Util.StringToNativeUtf8(valueRepresentation);
+                try
+                {
+                    ls_field_value_representation_set(FieldReference, utf8Value);
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(utf8Value);
+                }
+            }
+
             public bool IsInt64 => FieldType.IsInt64(Type);
 
             public bool IsUInt64 => FieldType.IsUInt64(Type);
@@ -815,6 +850,12 @@ namespace LemonShark
         public byte[] BytesValue => FieldStruct.BytesValue;
 
         public void SetBytesValue(byte[] value, int type) => FieldStruct.SetBytesValue(value, type);
+
+        public string ValueRepresentation
+        {
+            get => FieldStruct.ValueRepresentation;
+            set => FieldStruct.SetValueRepresentation(value);
+        }
 
         public bool IsInt64 => FieldType.IsInt64(Type);
 

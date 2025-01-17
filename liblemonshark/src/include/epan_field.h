@@ -81,6 +81,8 @@ extern "C"
 
     WS_DLL_PUBLIC gint64 ls_epan_field_value_bytes_length(epan_field_t *epan_field);
 
+    WS_DLL_PUBLIC const char *ls_epan_field_value_representation_get(epan_field_t *epan_field);
+
     WS_DLL_PUBLIC gint32 ls_epan_field_children_count(epan_field_t *epan_field);
 
     WS_DLL_PUBLIC epan_field_t *ls_epan_field_children_get(epan_field_t *epan_field, gint32 index);

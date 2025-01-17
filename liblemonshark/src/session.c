@@ -36,6 +36,8 @@ SPDX-License-Identifier: GPL-2.0-only
 #include "file.h"
 #include "frame_tvbuff.h"
 
+#include "locale.h"
+
 // lemonshark includes
 #include "session.h"
 #include "ls_common.h"
@@ -77,6 +79,12 @@ static session_t *ls_session_new(void)
 
 static gint32 ls_init_infrastructure(char **error_message)
 {
+#ifdef _WIN32
+    setlocale(LC_ALL, ".UTF-8");
+#else
+    setlocale(LC_ALL, "");
+#endif
+
     cmdarg_err_init(ls_error_print, ls_error_print);
     ws_log_init(LS_APP_NAME, ls_error_print);
 
@@ -520,6 +528,7 @@ packet_t *ls_session_get_packet(gint32 packet_id, const gint32 include_buffers, 
 
 typedef struct handle_proto_node_data
 {
+    packet_info *packet_info;
     field_t *parent_field;
     GPtrArray *buffers;
     const gint32 include_buffers;
@@ -564,6 +573,7 @@ packet_t *ls_packet_new_from_packet_info(packet_info *current_packet_info, proto
 
     handle_proto_node_data_t handle_proto_node_data =
         {
+            .packet_info = current_packet_info,
             .parent_field = packet->root_field,
             .buffers = buffers,
             .include_buffers = include_buffers,
@@ -637,6 +647,50 @@ void ls_field_handle_proto_node(proto_node *node, gpointer data)
     }
 
     ls_field_value_set_from_ftvalue(field, current_field_info, handle_proto_node_data->include_strings, handle_proto_node_data->include_bytes);
+
+    char *value_representation = NULL;
+    switch (current_header_field_info->type)
+    {
+    case FT_INT8:
+    case FT_INT16:
+    case FT_INT24:
+    case FT_INT32:
+    case FT_INT40:
+    case FT_INT48:
+    case FT_INT56:
+    case FT_INT64:
+    case FT_UINT8:
+    case FT_UINT16:
+    case FT_UINT24:
+    case FT_UINT32:
+    case FT_UINT40:
+    case FT_UINT48:
+    case FT_UINT56:
+    case FT_UINT64:
+    case FT_FLOAT:
+    case FT_DOUBLE:
+    case FT_STRING:
+    case FT_STRINGZ:
+    case FT_STRINGZPAD:
+    case FT_STRINGZTRUNC:
+    case FT_UINT_STRING:
+    case FT_BYTES:
+    case FT_UINT_BYTES:
+    {
+        value_representation = NULL;
+    }
+    break;
+    default:
+    {
+        if (handle_proto_node_data->include_representations)
+        {
+            value_representation = fvalue_to_string_repr(handle_proto_node_data->packet_info->pool, current_field_info->value, FTREPR_DISPLAY, BASE_NONE);
+        }
+    }
+    break;
+    }
+
+    ls_field_value_representation_set(field, value_representation);
 
     ls_field_children_add(handle_proto_node_data->parent_field, field);
 

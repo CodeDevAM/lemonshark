@@ -25,11 +25,12 @@ extern "C"
         gint32 type;
         const char *name;
         const char *display_name;
+        gint32 parent_id;
     } field_description_t;
 
     WS_DLL_PUBLIC field_description_t *ls_field_description_new(void);
 
-    void ls_field_description_init(field_description_t *field_description, gint32 id, gint32 type, const char *name, const char *display_name);
+    void ls_field_description_init(field_description_t *field_description, gint32 id, gint32 type, const char *name, const char *display_name, gint32 parent_id);
 
     void ls_field_description_init_from_header_field_info(field_description_t *field_description, header_field_info *current_header_field_info);
 
@@ -46,6 +47,8 @@ extern "C"
     WS_DLL_PUBLIC const char *ls_field_description_name_get(field_description_t *field_description);
 
     WS_DLL_PUBLIC const char *ls_field_description_display_name_get(field_description_t *field_description);
+
+    WS_DLL_PUBLIC gint32 ls_field_description_parent_id_get(field_description_t *field_description);
 
     WS_DLL_PUBLIC field_description_t *ls_field_description_get_by_id(gint32 id);
 

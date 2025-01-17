@@ -94,6 +94,18 @@ public class FieldDescription
     }
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    private static extern int ls_field_description_parent_id_get(IntPtr field_description);
+
+    public int ParentId
+    {
+        get
+        {
+            int parent_id = ls_field_description_parent_id_get(FieldDescriptionReference);
+            return parent_id;
+        }
+    }
+
+    [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr ls_field_description_get_by_id(int id);
 
     public static FieldDescription GetById(int id)

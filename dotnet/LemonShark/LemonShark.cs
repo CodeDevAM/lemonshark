@@ -144,7 +144,7 @@ public class LemonShark
     [DllImport(LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern long ls_string_length_get(IntPtr value);
 
-    internal static long GetStringLength(IntPtr value)
+    public static long GetStringLength(IntPtr value)
     {
         if (value == IntPtr.Zero)
         {

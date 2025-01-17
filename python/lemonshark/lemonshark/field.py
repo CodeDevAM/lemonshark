@@ -116,6 +116,12 @@ class Field:
             liblemonshark.ls_field_value_set_bytes.argtypes = [c_void_p, c_char_p, c_int32, c_int32]
             liblemonshark.ls_field_value_set_bytes.restype = c_int32
 
+            liblemonshark.ls_field_value_representation_get.argtypes = [c_void_p]
+            liblemonshark.ls_field_value_representation_get.restype = c_char_p
+
+            liblemonshark.ls_field_value_representation_set.argtypes = [c_void_p, c_char_p]
+            liblemonshark.ls_field_value_representation_set.restype = None
+
             liblemonshark.ls_field_children_count.argtypes = [c_void_p]
             liblemonshark.ls_field_children_count.restype = c_int32
 
@@ -282,6 +288,31 @@ class Field:
         liblemonshark: CDLL = Field.get_liblemonshark()
         liblemonshark.ls_field_encoding_set(self.c_field, encoding)
 
+    def is_int64(self) -> bool:
+        field_type: int = self.get_type()
+        result: bool = FieldType.is_int64(field_type)
+        return result
+
+    def is_uint64(self) -> bool:
+        field_type: int = self.get_type()
+        result: bool = FieldType.is_uint64(field_type)
+        return result
+
+    def is_double(self) -> bool:
+        field_type: int = self.get_type()
+        result: bool = FieldType.is_double(field_type)
+        return result
+
+    def is_string(self) -> bool:
+        field_type: int = self.get_type()
+        result: bool = FieldType.is_string(field_type)
+        return result
+
+    def is_bytes(self) -> bool:
+        field_type: int = self.get_type()
+        result: bool = FieldType.is_bytes(field_type)
+        return result
+    
     def get_int64_value(self) -> int:
         is_int64: bool = self.is_int64()
         if not is_int64:
@@ -379,31 +410,22 @@ class Field:
 
         if set_result == LemonShark.error():
             raise Exception("Invalid type")
+        
+    def get_value_representation(self) -> str:
+        liblemonshark: CDLL = Field.get_liblemonshark()
+        c_value_representation: bytes = liblemonshark.ls_field_value_representation_get(self.c_field)
 
-    def is_int64(self) -> bool:
-        field_type: int = self.get_type()
-        result: bool = FieldType.is_int64(field_type)
-        return result
+        if c_value_representation is None:
+            return None
 
-    def is_uint64(self) -> bool:
-        field_type: int = self.get_type()
-        result: bool = FieldType.is_uint64(field_type)
-        return result
+        value_representation: str = c_value_representation.decode("utf-8")
 
-    def is_double(self) -> bool:
-        field_type: int = self.get_type()
-        result: bool = FieldType.is_double(field_type)
-        return result
+        return value_representation
 
-    def is_string(self) -> bool:
-        field_type: int = self.get_type()
-        result: bool = FieldType.is_string(field_type)
-        return result
-
-    def is_bytes(self) -> bool:
-        field_type: int = self.get_type()
-        result: bool = FieldType.is_bytes(field_type)
-        return result
+    def set_value_representation(self, value_representation: str) -> None:
+        liblemonshark: CDLL = Field.get_liblemonshark()
+        c_value_representation: c_char_p = c_char_p(value_representation.encode("utf-8"))
+        liblemonshark.ls_field_value_representation_set(self.c_field, c_value_representation)
 
     def children_count(self) -> int:
         liblemonshark: CDLL = Field.get_liblemonshark()

@@ -69,6 +69,7 @@ const char *ls_epan_field_representation_get(epan_field_t *epan_field)
         return NULL;
     }
     const char *representation = current_field_info->rep->representation;
+
     return representation;
 }
 
@@ -578,6 +579,54 @@ gint64 ls_epan_field_value_bytes_length(epan_field_t *epan_field)
     }
 
     return length;
+}
+
+const char *ls_epan_field_value_representation_get(epan_field_t *epan_field)
+{
+    const field_info *current_field_info = epan_field->tree_node->finfo;
+    const header_field_info* current_header_field_info = current_field_info->hfinfo;
+    if (current_field_info == NULL)
+    {
+        return NULL;
+    }
+    
+    switch (current_header_field_info->type)
+    {
+    case FT_INT8:
+    case FT_INT16:
+    case FT_INT24:
+    case FT_INT32:
+    case FT_INT40:
+    case FT_INT48:
+    case FT_INT56:
+    case FT_INT64:
+    case FT_UINT8:
+    case FT_UINT16:
+    case FT_UINT24:
+    case FT_UINT32:
+    case FT_UINT40:
+    case FT_UINT48:
+    case FT_UINT56:
+    case FT_UINT64:
+    case FT_FLOAT:
+    case FT_DOUBLE:
+    case FT_STRING:
+    case FT_STRINGZ:
+    case FT_STRINGZPAD:
+    case FT_STRINGZTRUNC:
+    case FT_UINT_STRING:
+    case FT_BYTES:
+    case FT_UINT_BYTES:
+        {
+        return NULL;
+        }
+        break;
+    default:
+        break;
+    }
+    const char *value_representation = fvalue_to_string_repr(epan_field->epan_packet->epan_dissect->pi.pool, current_field_info->value, FTREPR_DISPLAY, BASE_NONE);
+
+    return value_representation;
 }
 
 static void ls_epan_field_count_children(proto_node *node _U_, gpointer data)

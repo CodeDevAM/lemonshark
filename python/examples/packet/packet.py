@@ -57,6 +57,10 @@ def print_fields(field: Field, indentation_count: int) -> None:
 
     print(": ", end="")
 
+    value_representation: str = field.get_value_representation()
+    if value_representation is not None:
+        print(f"{value_representation}, ", end="")
+
     if field.is_int64():
         value: int = field.get_int64_value()
         print(f"""{value} (0x{value:X})""", end="")

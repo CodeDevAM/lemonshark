@@ -47,7 +47,13 @@ static void PrintFieldDescription(FieldDescription fieldDescription)
     string name = fieldDescription.Name;
     int type = fieldDescription.Type;
     int id = fieldDescription.Id;
+    int parentId = fieldDescription.ParentId;
     string type_name = FieldType.GetName(type);
 
-    Console.WriteLine($"""{displayName} (Name: {name}, Type: {type_name}, Id: {id})""");
+    Console.Write($"""{displayName} (Name: {name}, Type: {type_name}, Id: {id}""");
+    if (parentId >= 0)
+    {
+        Console.Write($", Parent: {parentId}");
+    }
+    Console.WriteLine(")");
 }

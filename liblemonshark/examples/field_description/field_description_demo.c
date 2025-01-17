@@ -18,8 +18,14 @@ static void print_field_description(field_description_t* field_description)
     const char* name = ls_field_description_name_get(field_description);
     const char* display_name = ls_field_description_display_name_get(field_description);
     const char* type_name = ls_field_type_get_name(field_type);
+    gint32 parent_id = ls_field_description_parent_id_get(field_description);
 
-    g_print("%s (%s, %s, %i)\n", display_name, name, type_name, field_id);
+    g_print("%s (Name: %s, Type: %s, Id: %i", display_name, name, type_name, field_id);
+    if (parent_id >= 0)
+    {
+        g_print(", Parent: %i", parent_id);
+    }
+    g_print(")\n");
 }
 
 int main(void)

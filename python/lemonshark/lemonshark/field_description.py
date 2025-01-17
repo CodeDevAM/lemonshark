@@ -49,6 +49,9 @@ class FieldDescription:
             liblemonshark.ls_field_description_get_by_name.argtypes = [c_char_p]
             liblemonshark.ls_field_description_get_by_name.restype = c_void_p
 
+            liblemonshark.ls_field_description_parent_id_get.argtypes = [c_void_p]
+            liblemonshark.ls_field_description_parent_id_get.restype = c_int32
+
             liblemonshark.ls_field_description_get_all.argtypes = [POINTER(c_int32)]
             liblemonshark.ls_field_description_get_all.restype = c_void_p
 
@@ -114,6 +117,10 @@ class FieldDescription:
 
         return name
 
+    def get_parent_id(self) -> int:
+        liblemonshark: CDLL = FieldDescription.get_liblemonshark()
+        parent_id: int = liblemonshark.ls_field_description_parent_id_get(self.c_field_description)
+        return parent_id
 
     def get_by_id(id: int) -> "FieldDescription":
         if id < 0:

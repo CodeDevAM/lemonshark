@@ -24,9 +24,13 @@ def print_field_description(field_description: FieldDescription) -> None:
     name: str = field_description.get_name()
     type: int = field_description.get_type()
     id: int = field_description.get_id()
+    parent_id: int = field_description.get_parent_id()
     type_name: str = FieldType.get_name(type)
 
-    print(f"""{display_name} (Name: {name}, Type: {type_name}, Id: {id})""")
+    print(f"""{display_name} (Name: {name}, Type: {type_name}, Id: {id})""", end="")
+    if parent_id >= 0:
+        print(f""", Parent: {parent_id}""", end="")
+    print(")")
 
 
 def main():

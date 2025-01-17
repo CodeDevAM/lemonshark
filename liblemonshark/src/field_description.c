@@ -18,17 +18,18 @@ field_description_t *ls_field_description_new(void)
     return field_description;
 }
 
-void ls_field_description_init(field_description_t *field_description, gint32 id, gint32 type, const char *name, const char *display_name)
+void ls_field_description_init(field_description_t *field_description, gint32 id, gint32 type, const char *name, const char *display_name, gint32 parent_id)
 {
     field_description->id = id;
     field_description->type = type;
     field_description->name = name;
     field_description->display_name = display_name;
+    field_description->parent_id = parent_id;
 }
 
 void ls_field_description_init_from_header_field_info(field_description_t *field_description, header_field_info *current_header_field_info)
 {
-    ls_field_description_init(field_description, current_header_field_info->id, current_header_field_info->type, current_header_field_info->abbrev, current_header_field_info->name);
+    ls_field_description_init(field_description, current_header_field_info->id, current_header_field_info->type, current_header_field_info->abbrev, current_header_field_info->name, current_header_field_info->parent);
 }
 
 void ls_field_description_free(field_description_t *field_description)
@@ -79,6 +80,11 @@ const char *ls_field_description_name_get(field_description_t *field_description
 const char *ls_field_description_display_name_get(field_description_t *field_description)
 {
     return field_description->display_name;
+}
+
+gint32 ls_field_description_parent_id_get(field_description_t *field_description)
+{
+    return field_description->parent_id;
 }
 
 field_description_t *ls_field_description_get_by_id(gint32 id)

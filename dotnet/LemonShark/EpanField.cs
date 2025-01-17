@@ -409,7 +409,7 @@ namespace LemonShark
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-            private static extern long ls_epan_field_value_get_double(IntPtr epan_field);
+            private static extern double ls_epan_field_value_get_double(IntPtr epan_field);
 
             public double DoubleValue
             {
@@ -531,6 +531,52 @@ namespace LemonShark
                     return 0;
                 }
                 return (int)length;
+            }
+
+            [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            private static extern IntPtr ls_epan_field_value_representation_get(IntPtr epan_field);
+            public string ValueRepresentation
+            {
+                get
+                {
+                    ThrowIfNotValid();
+                    IntPtr valueRepresentationReference = ls_epan_field_representation_get(EpanFieldReference);
+                    if (valueRepresentationReference == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+                    string result = Util.NativeUtf8ToString(valueRepresentationReference);
+                    return result;
+                }
+            }
+
+            public int GetValueRepresentationLength()
+            {
+                ThrowIfNotValid();
+
+                IntPtr valueRepresentationReference = ls_epan_field_representation_get(EpanFieldReference);
+                if (valueRepresentationReference == IntPtr.Zero)
+                {
+                    return 0;
+                }
+
+                long length = LemonShark.GetStringLength(EpanFieldReference);
+                if (length > 0x7FFFFFFF)
+                {
+                    throw new Exception("length > 0x7FFFFFFF");
+                }
+                if (length < 0)
+                {
+                    return 0;
+                }
+                return (int)length;
+            }
+
+            public IntPtr GetRawValueRepresentation()
+            {
+                ThrowIfNotValid();
+                IntPtr representationReference = ls_epan_field_value_representation_get(EpanFieldReference);
+                return representationReference;
             }
 
             [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -721,29 +767,22 @@ namespace LemonShark
         public bool IsDouble => EpanFieldStruct.IsDouble;
         public bool IsString => EpanFieldStruct.IsString;
         public bool IsBytes => EpanFieldStruct.IsBytes;
-
         public long Int64Value => EpanFieldStruct.Int64Value;
-
         public ulong UInt64Value => EpanFieldStruct.UInt64Value;
-
         public double DoubleValue => EpanFieldStruct.DoubleValue;
-
         public string StringValue => EpanFieldStruct.StringValue;
         public int GetStringValueLength() => EpanFieldStruct.GetStringValueLength();
         public IntPtr GetRawStringValue() => EpanFieldStruct.GetRawStringValue();
         public byte[] BytesValue => EpanFieldStruct.BytesValue;
+        public string ValueRepresentation => EpanFieldStruct.ValueRepresentation;
+        public int GetValueRepresentationLength() => EpanFieldStruct.GetValueRepresentationLength();
+        public IntPtr GetRawValueRepresentation() => EpanFieldStruct.GetRawValueRepresentation();
         public int ChildrenCount => EpanFieldStruct.ChildrenCount;
-
         public EpanFieldStruct GetChildStruct(int index) => EpanFieldStruct.GetChildStruct(index);
-
         public EpanField GetChild(int index) => EpanFieldStruct.GetChild(index);
-
         public void DoForEachChild(EpanFieldStructHandler epanFieldHandler, bool recursively) => EpanFieldStruct.DoForEachChild(epanFieldHandler, recursively);
-
         public void DoForEachChild(EpanFieldHandler epanFieldHandler, bool recursively) => EpanFieldStruct.DoForEachChild(epanFieldHandler, recursively);
-
         public List<EpanFieldStruct> ChildrenStruct => EpanFieldStruct.ChildrenStruct;
-
         public List<EpanField> Children => EpanFieldStruct.Children;
     }
 

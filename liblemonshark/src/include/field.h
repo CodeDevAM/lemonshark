@@ -41,6 +41,7 @@ extern "C"
         gint32 generated;
         gint32 encoding;
         field_value_t value;
+        char *value_representation;
         gboolean value_requires_free;
         GArray *children;
     } field_t;
@@ -114,6 +115,10 @@ extern "C"
     WS_DLL_PUBLIC gint32 ls_field_value_set_bytes(field_t *field, const guint8 *value, gint32 length, const gint32 type);
 
     WS_DLL_PUBLIC gint32 ls_field_value_take_bytes(field_t *field, const guint8 *value, gint32 length, const gint32 type);
+
+    WS_DLL_PUBLIC const char *ls_field_value_representation_get(field_t *field);
+
+    WS_DLL_PUBLIC void ls_field_value_representation_set(field_t *field, const char *value_representation);
 
     WS_DLL_PUBLIC gint32 ls_field_children_count(field_t *field);
 

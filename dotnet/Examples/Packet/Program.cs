@@ -129,6 +129,12 @@ internal class Program
 
         Console.Write(": ");
 
+        string valueRepresentation = field.ValueRepresentation;
+        if (valueRepresentation is not null)
+        {
+            Console.Write($"{valueRepresentation}, ");
+        }
+
         if (field.IsInt64)
         {
             long value = field.Int64Value;

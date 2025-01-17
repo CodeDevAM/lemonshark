@@ -55,6 +55,10 @@ def print_fields(epan_field: EpanField, indentation_count: int) -> None:
 
     print(": ", end="")
 
+    value_representation: str = epan_field.get_value_representation()
+    if value_representation is not None:
+        print(f"{value_representation}, ", end="")
+
     if epan_field.is_int64():
         value: int = epan_field.get_int64_value()
         print(f"""{value} (0x{value:X})""", end="")

@@ -360,6 +360,21 @@ gint32 ls_field_value_take_bytes(field_t *field, const guint8 *value, gint32 len
     return LS_OK;
 }
 
+const char *ls_field_value_representation_get(field_t *field)
+{
+    return field->value_representation;
+}
+
+void ls_field_value_representation_set(field_t *field, const char *value_representation)
+{
+    if (field->value_representation != NULL)
+    {
+        g_free(field->value_representation);
+    }
+
+    field->value_representation = value_representation != NULL ? g_strdup(value_representation) : NULL;
+}
+
 gint32 ls_field_children_count(field_t *field)
 {
     if (field == NULL)
