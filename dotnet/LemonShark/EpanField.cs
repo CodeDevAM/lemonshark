@@ -504,7 +504,11 @@ namespace LemonShark
 
                     byte[] result = new byte[length];
 
-                    _ = ls_epan_field_value_get_bytes(EpanFieldReference, result, length);
+                    int actualLength = ls_epan_field_value_get_bytes(EpanFieldReference, result, length);
+                    if (actualLength < 0)
+                    {
+                        return null;
+                    }
 
                     return result;
                 }

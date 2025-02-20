@@ -36,7 +36,7 @@ lemonshark_host_binary_base_directory: str = f"""{lemonshark_host_build_director
 
 lemonshark_major_version: int = 0
 lemonshark_minor_version: int = 9
-lemonshark_patch_version: int = 0
+lemonshark_patch_version: int = 1
 
 wireshark_git_url: str = "https://gitlab.com/wireshark/wireshark.git"
 wireshark_major_version: int = 4

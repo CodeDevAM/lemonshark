@@ -324,9 +324,14 @@ class EpanField:
         length: int = liblemonshark.ls_epan_field_value_bytes_length()
         if length <= 0:
             return None
+        
         buffer: bytes = bytes(length)
         c_buffer: c_char_p = c_char_p(buffer)
-        liblemonshark.ls_epan_field_value_get_bytes(self.c_epan_field, c_buffer, length)
+
+        actual_length:int =liblemonshark.ls_epan_field_value_get_bytes(self.c_epan_field, c_buffer, length)
+        if actual_length < 0:
+            return None
+        
         return buffer
     
     def get_value_representation(self) -> str:

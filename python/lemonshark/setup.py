@@ -4,7 +4,7 @@ Copyright (c) 2024 DevAM. All Rights Reserved.
 SPDX-License-Identifier: GPL-2.0-only
 """
 
-from setuptools import setup
+from setuptools import find_namespace_packages, setup
 
 from os import path
 working_directory = path.abspath(path.dirname(__file__))
@@ -14,12 +14,13 @@ with open(path.join(working_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="lemonshark",
-    version="0.9.0",
+    version="0.9.1",
     description="lemonshark allows to use Wireshark as a library in an python application",
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="GPL-2.0-only",
-    packages=["lemonshark"],
+    license_files=["LICENSE"],
+    packages=find_namespace_packages(include=["lemonshark", "lemonshark.native.*"]),
     author="DevAM",
     author_email="email@example.com",
     keywords=["lemonshark", "shark", "Wireshark"],

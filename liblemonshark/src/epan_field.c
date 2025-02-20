@@ -8,6 +8,7 @@ SPDX-License-Identifier: GPL-2.0-only
 
 // wireshark includes
 #include "epan/proto.h"
+#include "epan/exceptions.h"
 
 // lemonshark includes
 #include "ls_common.h"
@@ -405,28 +406,35 @@ const char *ls_epan_field_value_get_string(epan_field_t *epan_field)
     const header_field_info *current_header_field_info = current_field_info->hfinfo;
 
     const char *value = NULL;
-
-    switch (current_header_field_info->type)
+    TRY
     {
-    case FT_STRING:
-    case FT_STRINGZ:
-    case FT_STRINGZPAD:
-    case FT_STRINGZTRUNC:
-    case FT_UINT_STRING:
-    case FT_AX25:
-    {
-        const wmem_strbuf_t *string_buffer = fvalue_get_strbuf(current_field_info->value);
-        value = wmem_strbuf_get_str(string_buffer);
-    }
-    break;
-    case FT_NONE:
-    {
-        value = current_field_info->rep->representation;
-    }
-    break;
-    default:
+        switch (current_header_field_info->type)
+        {
+        case FT_STRING:
+        case FT_STRINGZ:
+        case FT_STRINGZPAD:
+        case FT_STRINGZTRUNC:
+        case FT_UINT_STRING:
+        case FT_AX25:
+        {
+            const wmem_strbuf_t *string_buffer = fvalue_get_strbuf(current_field_info->value);
+            value = wmem_strbuf_get_str(string_buffer);
+        }
         break;
+        case FT_NONE:
+        {
+            value = current_field_info->rep->representation;
+        }
+        break;
+        default:
+            break;
+        }
     }
+    CATCH_ALL
+    {
+        value = NULL;
+    }
+    ENDTRY;
 
     return value;
 }
@@ -449,82 +457,90 @@ gint32 ls_epan_field_value_get_bytes(epan_field_t *epan_field, guint8 *target, g
 
     gint32 length = 0;
 
-    switch (current_header_field_info->type)
+    TRY
     {
-    case FT_ETHER:
-    case FT_BYTES:
-    case FT_UINT_BYTES:
-    {
-        length = (gint32)(fvalue_get_bytes_size(current_field_info->value) & 0x7FFFFFFF);
-        const guint8 *value = (const guint8 *)fvalue_get_bytes_data(current_field_info->value);
-        memcpy(target, value, length < max_length ? length : max_length);
-    }
-    break;
-
-    case FT_IPv6:
-    {
-        const ipv6_addr_and_prefix *current_ipv6_addr_and_prefix = fvalue_get_ipv6(current_field_info->value);
-        length = 16;
-        const guint8 *value = (const guint8 *)current_ipv6_addr_and_prefix->addr.bytes;
-        memcpy(target, value, length < max_length ? length : max_length);
-    }
-    break;
-    case FT_GUID:
-    {
-        const e_guid_t *guid = fvalue_get_guid(current_field_info->value);
-
-        length = 0;
-
-        if (max_length >= 4)
+        switch (current_header_field_info->type)
         {
-            ((guint32 *)target)[0] = (guint32)guid->data1;
-            length = 4;
-        }
-        if (max_length >= 6)
+        case FT_ETHER:
+        case FT_BYTES:
+        case FT_UINT_BYTES:
         {
-            ((guint16 *)target)[2] = (guint16)guid->data2;
-            length = 6;
+            length = (gint32)(fvalue_get_bytes_size(current_field_info->value) & 0x7FFFFFFF);
+            const guint8 *value = (const guint8 *)fvalue_get_bytes_data(current_field_info->value);
+            memcpy(target, value, length < max_length ? length : max_length);
         }
-        if (max_length >= 8)
-        {
-            ((guint16 *)target)[3] = (guint16)guid->data3;
-            length = 8;
-        }
-        if (max_length >= 16)
-        {
-            ((guint64 *)target)[1] = ((guint64 *)guid->data4)[0];
-            length = 16;
-        }
-    }
-    break;
-    case FT_OID:
-    case FT_VINES:
-    case FT_REL_OID:
-    case FT_SYSTEM_ID:
-    case FT_FCWWN:
-    {
-        length = (gint32)(fvalue_get_bytes_size(current_field_info->value) & 0x7FFFFFFF);
-        const guint8 *value = fvalue_get_bytes_data(current_field_info->value);
-        memcpy(target, value, length < max_length ? length : max_length);
-    }
-    break;
-    case FT_PROTOCOL:
-    {
-        length = ls_epan_field_length_get(epan_field);
-        if (length > 0)
-        {
-            tvbuff_t *buffer = fvalue_get_protocol(current_field_info->value);
-            tvb_memcpy(buffer, target, 0, length < max_length ? length : max_length);
-        }
-        else
-        {
-            length = 0;
-        }
-    }
-    break;
-    default:
         break;
+
+        case FT_IPv6:
+        {
+            const ipv6_addr_and_prefix *current_ipv6_addr_and_prefix = fvalue_get_ipv6(current_field_info->value);
+            length = 16;
+            const guint8 *value = (const guint8 *)current_ipv6_addr_and_prefix->addr.bytes;
+            memcpy(target, value, length < max_length ? length : max_length);
+        }
+        break;
+        case FT_GUID:
+        {
+            const e_guid_t *guid = fvalue_get_guid(current_field_info->value);
+
+            length = 0;
+
+            if (max_length >= 4)
+            {
+                ((guint32 *)target)[0] = (guint32)guid->data1;
+                length = 4;
+            }
+            if (max_length >= 6)
+            {
+                ((guint16 *)target)[2] = (guint16)guid->data2;
+                length = 6;
+            }
+            if (max_length >= 8)
+            {
+                ((guint16 *)target)[3] = (guint16)guid->data3;
+                length = 8;
+            }
+            if (max_length >= 16)
+            {
+                ((guint64 *)target)[1] = ((guint64 *)guid->data4)[0];
+                length = 16;
+            }
+        }
+        break;
+        case FT_OID:
+        case FT_VINES:
+        case FT_REL_OID:
+        case FT_SYSTEM_ID:
+        case FT_FCWWN:
+        {
+            length = (gint32)(fvalue_get_bytes_size(current_field_info->value) & 0x7FFFFFFF);
+            const guint8 *value = fvalue_get_bytes_data(current_field_info->value);
+            memcpy(target, value, length < max_length ? length : max_length);
+        }
+        break;
+        case FT_PROTOCOL:
+        {
+            length = ls_epan_field_length_get(epan_field);
+            if (length > 0)
+            {
+                tvbuff_t *buffer = fvalue_get_protocol(current_field_info->value);
+                tvb_memcpy(buffer, target, 0, length < max_length ? length : max_length);
+            }
+            else
+            {
+                length = 0;
+            }
+        }
+        break;
+        default:
+            break;
+        }
     }
+    CATCH_ALL
+    {
+        length = -1;
+    }
+    ENDTRY;
 
     return length;
 }

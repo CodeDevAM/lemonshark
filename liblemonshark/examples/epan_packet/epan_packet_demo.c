@@ -99,7 +99,7 @@ static void print_fields(epan_field_t *epan_field, void *parameter)
     {
         if (field_type != ls_field_type_protocol())
         {
-            length = ls_epan_field_length_get(epan_field);
+            length = ls_epan_field_value_bytes_length(epan_field);
             guint8 *value = g_malloc(length);
             ls_epan_field_value_get_bytes(epan_field, value, length);
 
