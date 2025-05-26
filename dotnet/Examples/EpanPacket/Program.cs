@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+// Set the environment variable LS_EXAMPLE_FILE to the path of a valid trace file before running this example.
 string traceFilePath = Environment.GetEnvironmentVariable("LS_EXAMPLE_FILE", EnvironmentVariableTarget.Process);
 
 string assemblyDirectory = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Program)).Location);
@@ -32,7 +33,7 @@ else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 
 LemonShark.LemonShark.Init([wiresharkDirectory]);
 
-using Session session = Session.CreateFromFile(traceFilePath, "");
+using Session session = Session.CreateFromFile(traceFilePath, "", null);
 
 FieldDescription frameLengthFieldDescription = FieldDescription.GetByName("frame.len");
 int[] requestedFieldIds = [frameLengthFieldDescription.Id];

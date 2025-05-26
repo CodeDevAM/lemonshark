@@ -12,9 +12,9 @@
     <Authors>DevAM</Authors>
     <Company>DevAM</Company>
     <Product>LemonShark</Product>
-    <Version>0.9.1</Version>
-    <AssemblyVersion>0.9.1</AssemblyVersion>
-    <FileVersion>0.9.1</FileVersion>
+    <Version>0.10.0</Version>
+    <AssemblyVersion>0.10.0</AssemblyVersion>
+    <FileVersion>0.10.0</FileVersion>
     <Description>Wireshark bindings for C# and .NET.</Description>
     <Copyright>Copyright (c) 2024 DevAM. All Rights Reserved.</Copyright>
     <PackageIcon>icon.png</PackageIcon>

@@ -77,7 +77,7 @@ static session_t *ls_session_new(void)
     return session;
 }
 
-static gint32 ls_init_infrastructure(char **error_message)
+static gint32 ls_init_infrastructure(const char *profile, char **error_message)
 {
 #ifdef _WIN32
     setlocale(LC_ALL, ".UTF-8");
@@ -89,6 +89,8 @@ static gint32 ls_init_infrastructure(char **error_message)
     ws_log_init(LS_APP_NAME, ls_error_print);
 
     ws_init_version_info(LS_APP_NAME, epan_gather_compile_info, epan_gather_runtime_info);
+
+    configuration_init('\0', "wireshark");
 
     static const struct report_message_routines report_routines = {
         failure_message,
@@ -129,6 +131,19 @@ static gint32 ls_init_infrastructure(char **error_message)
 
     codecs_init();
 
+    if (profile != NULL && strlen(profile) > 0)
+    {
+        if (profile_exists(profile, false))
+        {
+            set_profile_name(profile);
+        }
+        else
+        {
+            *error_message = g_strdup("Unknown profile.");
+            return LS_ERROR;
+        }
+    }
+
     preferences = epan_load_settings();
 
     prefs_apply_all();
@@ -138,11 +153,11 @@ static gint32 ls_init_infrastructure(char **error_message)
     return LS_OK;
 }
 
-static gint32 ls_session_init(char **error_message)
+static gint32 ls_session_init(const char *profile, char **error_message)
 {
     if (infrastructure_is_initialized == FALSE)
     {
-        gint32 init_infrastructure_result = ls_init_infrastructure(error_message);
+        gint32 init_infrastructure_result = ls_init_infrastructure(profile, error_message);
         if (init_infrastructure_result == LS_ERROR)
         {
             return LS_ERROR;
@@ -274,9 +289,28 @@ static wtap_block_t ls_get_modified_block(struct packet_provider_data *prov, con
     return NULL;
 }
 
-gint32 ls_session_create_from_file(const char *file_path, const char *read_filter, char **error_message)
+gint32 ls_session_create_from_file(const char *file_path, const char *read_filter, const char *profile, char **error_message)
 {
-    gint32 init_result = ls_session_init(error_message);
+    if (session != NULL)
+    {
+        if (error_message != NULL)
+        {
+            *error_message = g_strdup("There can only be one session at a time.");
+        }
+
+        return LS_ERROR;
+    }
+
+    if(file_path == NULL || strlen(file_path) == 0)
+    {
+        if (error_message != NULL)
+        {
+            *error_message = g_strdup("File path is empty.");
+        }
+        return LS_ERROR;
+	}
+
+    gint32 init_result = ls_session_init(profile, error_message);
     if (init_result == LS_ERROR)
     {
         return LS_ERROR;

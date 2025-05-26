@@ -17,9 +17,9 @@ public class Session : IDisposable
 
 
     [DllImport(LemonShark.LemonSharkLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern int ls_session_create_from_file(IntPtr filePath, IntPtr readFilter, ref IntPtr errorMessage);
+    private static extern int ls_session_create_from_file(IntPtr filePath, IntPtr readFilter, IntPtr profile, ref IntPtr errorMessage);
 
-    public static Session CreateFromFile(string filePath, string readFilter)
+    public static Session CreateFromFile(string filePath, string readFilter, string profile)
     {
         if (_CurrentSession is not null)
         {
@@ -32,12 +32,14 @@ public class Session : IDisposable
 
         IntPtr utf8ReadFilter = Util.StringToNativeUtf8(readFilter);
 
+        IntPtr utf8Profile = Util.StringToNativeUtf8(profile);
+
         IntPtr errorMessage = default;
         int creationResult = 0;
 
         try
         {
-            creationResult = ls_session_create_from_file(utf8FilePath, utf8ReadFilter, ref errorMessage);
+            creationResult = ls_session_create_from_file(utf8FilePath, utf8ReadFilter, utf8Profile, ref errorMessage);
         }
         finally
         {

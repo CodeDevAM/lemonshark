@@ -27,9 +27,10 @@ def main():
 
     LemonShark.init([wireshark_directory])
 
+    # Set the environment variable LS_EXAMPLE_FILE to the path of a valid trace file before running this example.
     trace_file_path: str = os.environ["LS_EXAMPLE_FILE"]
 
-    session: Session = Session.create_from_file(trace_file_path, "")
+    session: Session = Session.create_from_file(trace_file_path, "", None)
 
     # Test a valid filter
     filter:str = "frame.len < 150"

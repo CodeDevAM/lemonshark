@@ -21,7 +21,7 @@ class Session:
         liblemonshark: CDLL = LemonShark.get_liblemonshark()
 
         if not Session.__liblemonshark_initialized:
-            liblemonshark.ls_session_create_from_file.argtypes = [c_char_p, c_char_p, POINTER(c_void_p)]
+            liblemonshark.ls_session_create_from_file.argtypes = [c_char_p, c_char_p, c_char_p, POINTER(c_void_p)]
             liblemonshark.ls_session_create_from_file.restype = c_int32
 
             liblemonshark.ls_session_get_next_packet_id.argtypes = [POINTER(c_void_p)]
@@ -43,7 +43,7 @@ class Session:
     def __init__(self) -> None:
         self.closed = False
 
-    def create_from_file(file_path: str, read_filter: str) -> "Session":
+    def create_from_file(file_path: str, read_filter: str, profile: str) -> "Session":
         liblemonshark: CDLL = Session.get_liblemonshark()
 
         if Session.__current_session is not None:
@@ -53,8 +53,9 @@ class Session:
 
         c_file_path: c_char_p = c_char_p(file_path.encode("utf-8"))
         c_read_filter: c_char_p = c_char_p(read_filter.encode("utf-8"))
+        c_profile: c_char_p = c_char_p(profile.encode("utf-8"))
         c_error_message = c_void_p()
-        creation_result: int = liblemonshark.ls_session_create_from_file(c_file_path, c_read_filter, byref(c_error_message))
+        creation_result: int = liblemonshark.ls_session_create_from_file(c_file_path, c_read_filter, c_profile, byref(c_error_message))
 
         if creation_result == LemonShark.error():
             error_message: str = ""

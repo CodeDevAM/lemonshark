@@ -15,10 +15,11 @@ int main(void)
 {
     void *error_handler = ls_error_handler_add(handle_error);
 
+	// Set the environment variable LS_EXAMPLE_FILE to the path of a valid trace file before running this example.
     const char *trace_file_path = g_getenv("LS_EXAMPLE_FILE");
 
     char *error_message = NULL;
-    gint32 init_result = ls_session_create_from_file(trace_file_path, "", &error_message);
+    gint32 init_result = ls_session_create_from_file(trace_file_path, "", NULL, &error_message);
 
     if (init_result == LS_ERROR)
     {

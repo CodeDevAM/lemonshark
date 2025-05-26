@@ -487,3 +487,4 @@ $RECYCLE.BIN/
 [Bb]uild
 [Ww]ireshark
 [Dd]ata
+*.egg-info

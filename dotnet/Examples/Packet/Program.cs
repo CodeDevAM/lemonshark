@@ -15,6 +15,7 @@ internal class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+        // Set the environment variable LS_EXAMPLE_FILE to the path of a valid trace file before running this example.
         string traceFilePath = Environment.GetEnvironmentVariable("LS_EXAMPLE_FILE", EnvironmentVariableTarget.Process);
 
         string assemblyDirectory = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Program)).Location);
@@ -37,7 +38,7 @@ internal class Program
         LemonShark.Init([wiresharkDirectory]);
 
         // Read a file with a read filter
-        using Session session = Session.CreateFromFile(traceFilePath, "frame.len < 150");
+        using Session session = Session.CreateFromFile(traceFilePath, "frame.len < 150", null);
 
         try
         {
